@@ -1,0 +1,75 @@
+#homepage{
+    padding:10px;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+#homepage-heading{
+
+    padding: 10px;
+    border-radius: 15px;
+    background-color: #e5e591;
+    font-size: 2em;
+    color: #053081;
+    font-weight: 800;
+    width: fit-content;
+}
+#homepage-curpath{
+    width: fit-content;
+    border-radius: 10px;
+    padding: 10px;
+    display:flex;
+    gap: 10px;
+    font-size: 20px;
+}
+#homepage-curpath> span>span:nth-child(2){
+    background-color: #c9e8e8;
+    border-radius: 10px;
+    padding: 5px 5px;
+}
+#documents-page{
+    border-radius: 10px;
+    padding: 10px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+
+}
+#documents-context-menu{
+    background-color: white;
+    position: absolute;
+    width: 200px;
+    box-shadow: black 1px 1px 5px 0 ;
+    border-radius: 5px;
+    padding: 5px;
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.15s linear;
+}
+
+#documents-context-menu>div{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0;
+}
+#documents-context-menu>div:hover{
+    background-color: #cef1f1;
+}
+
+#documents-folders,#documents-files{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+}
+#documents-folders > div, #documents-files > div{
+    width: fit-content;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #e1f3eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

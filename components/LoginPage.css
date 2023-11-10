@@ -1,0 +1,26 @@
+#loginpage{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 30px;
+}
+#loginpage-heading{
+    padding: 10px;
+    border-radius: 20px;
+    background-color: #e5e591;
+    font-size: 3em;
+    color: #053081;
+    font-weight: 800;
+}
+#loginpage-btn{
+    background-color: black;
+    border-radius: 10px;
+    color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor:pointer;
+}
