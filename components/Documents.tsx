@@ -29,25 +29,33 @@ export const Documents=()=>{
 	const documentsCompRef=useRef<HTMLDivElement>(null);
 
 	//retrieve docs
-	const RetrieveDocs=useCallback(async ()=>{
+	const RetrieveDocs=useCallback( ()=>{
 		if(UserInfo!=""){
 			const {email}:User=JSON.parse(UserInfo)
 			const tempfiles=new Array<generalDir>()
 			const tempfolders=new Array<generalDir>()
 			let finalpath=email!;
-			finalpath+="/doc/";
-			finalpath+=dir_path;
-			const response= await getDocs(collection(database,finalpath));
-			response.forEach((doc)=>{
-				if((doc.id.split(".")).length>1){
-					tempfiles.push({name:doc.id,db_url:doc.data().db_url})
-				}
-				else{
-					tempfolders.push({name:doc.id,db_url:doc.data().db_url});
+			const pathArray=dir_path!.split('/');
+			pathArray.forEach((value,index,pathArray)=>{
+				finalpath+="/"+value;
+				if(index<pathArray.length-1)
+				{
+					finalpath+="/folders";
 				}
 			})
-			setFiles(tempfiles);
-			setFolders(tempfolders);
+			getDocs(collection(database,finalpath+"/folders")).then((response)=>{
+				response.forEach((doc)=>{
+					tempfolders.push({name:doc.id,db_url:doc.data().db_url})
+				})
+				setFolders(tempfolders);
+			})
+			getDocs(collection(database,finalpath+"/files")).then((response)=>{
+				response.forEach((doc)=>{
+					tempfiles.push({name:doc.id,db_url:doc.data().db_url})
+				})
+				setFiles(tempfiles);
+			})
+
 		}
 	},[UserInfo, dir_path]);
 
@@ -70,20 +78,29 @@ export const Documents=()=>{
 
 	const upload_files=useCallback(async()=>{
 		if(myFileInput.current?.files){
+			const {email}:User=JSON.parse(UserInfo)
+			let finalpath=email!;
+			const pathArray=dir_path!.split('/');
+			pathArray.forEach((value,index,pathArray)=>{
+				finalpath+="/"+value;
+				if(index<pathArray.length-1)
+				{
+					finalpath+="/folders";
+				}
+			})
+			
 			const fileList=myFileInput.current.files;
 			const tempfiles:generalDir[]=[];
 			for(const file of fileList){
 				const filename=file.name;
 				const filePath=dir_path+"/"+filename;
 				const storeRef=ref(fireStorage,filePath);
-				try{
+				try
+				{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					const {email}:User=JSON.parse(UserInfo)
-					let temppath=email!;
-					temppath+="/doc/"+dir_path;
-					await setDoc(doc(database,temppath,filename),{db_url:url});
+					await setDoc(doc(database,finalpath+"/files",filename),{db_url:url});
 					tempfiles.push({name:filename,db_url:url});
 				}
 				catch(err){
