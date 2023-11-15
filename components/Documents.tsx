@@ -125,7 +125,23 @@ export const Documents=()=>{
 		e.stopPropagation();
 		SetContextContent([true,(e.clientX-4),(e.clientY-4),type,value]);
 	},[])
+
+	const openFile=useCallback((value:generalDir)=>{
+		const a=document.createElement("a");
+		a.download=value.name;
+		a.href=value.db_url!;
+		a.target="_blank";
+		a.click();
+	},[])
 	
+	const openFolder=useCallback((value:generalDir)=>{
+		let finalpath=dir_path!;
+		finalpath+="/";
+		finalpath+=value.name;
+		finalpath=encodeURIComponent(finalpath);
+		navigate("/"+finalpath);
+	},[dir_path, navigate])
+
 	return <div id={"documents-page"} onContextMenu={(e)=>ShowContextMenu(e,"Page",{name:""})} onDragOver={(e)=> {
 		e.preventDefault();
 		e.currentTarget.style.backgroundColor = "#c0d1ef"
@@ -143,7 +159,8 @@ export const Documents=()=>{
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"Folder",value)}>
+					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"Folder",value)}
+								onDoubleClick={()=>openFolder(value)}>
 						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
 						<div onClick={(e)=>ShowContextMenu(e,"Folder",value)}>
 							<BsThreeDotsVertical size={14}/>
@@ -156,9 +173,10 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"File",value)}>
+					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"File",value)}
+								onDoubleClick={()=>openFile(value)}>
 						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-						<div onClick={(e)=>ShowContextMenu(e,"File",value)}>
+						<div onClick={(e)=>ShowContextMenu(e,"File",value)} >
 							<BsThreeDotsVertical size={14}/>
 						</div>
 
