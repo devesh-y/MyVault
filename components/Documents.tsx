@@ -3,22 +3,22 @@ import {collection,getDocs,setDoc,doc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
 import {useEffect, useRef} from "react";
 import {User} from "firebase/auth"
-import {useCallback, useMemo, useState} from "react";
+import React,{useCallback, useMemo, useState} from "react";
 import {GetCookie} from "../utils/get_set_cookies.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
 import {BsThreeDotsVertical} from "react-icons/bs"
-import {AiOutlineFolderAdd} from "react-icons/ai";
-import {MdUploadFile} from "react-icons/md";
 import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
+import {Context_Menu} from "./Content_Menu.tsx";
 
-type generalDir ={
+export type generalDir ={
 	name:string,
-	db_url:string
+	db_url?:string,
+	timestamp?:Date
 }
 export const Documents=()=>{
-	const docsCompContextMenu=useRef<HTMLDivElement>(null);
+	const [ContextMenuContent,SetContextContent]=useState([false,0,0,"",{name:""}]); //visible, x,y,type,dirinfo
 	const navigate=useNavigate();
 	const {dir_path}=useParams();
 	const [Files,setFiles]=useState(new Array<generalDir>());
@@ -26,8 +26,7 @@ export const Documents=()=>{
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo)
 	const dispatch=useDispatch();
 	const myFileInput=useRef<HTMLInputElement>(null)
-	const documentsCompRef=useRef<HTMLDivElement>(null);
-
+	const ContextRef=useRef<HTMLDivElement>(null);
 	//retrieve docs
 	const RetrieveDocs=useCallback( ()=>{
 		if(UserInfo!=""){
@@ -45,7 +44,7 @@ export const Documents=()=>{
 			})
 			getDocs(collection(database,finalpath+"/folders")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfolders.push({name:doc.id,db_url:doc.data().db_url})
+					tempfolders.push({name:doc.id})
 				})
 				setFolders(tempfolders);
 			})
@@ -93,7 +92,7 @@ export const Documents=()=>{
 			const tempfiles:generalDir[]=[];
 			for(const file of fileList){
 				const filename=file.name;
-				const filePath=dir_path+"/"+filename;
+				const filePath=email!+"/"+dir_path!+"/"+filename;
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
@@ -112,69 +111,43 @@ export const Documents=()=>{
 		}
 	},[Files, UserInfo, dir_path])
 
-
-	//context-menu and , drag-n-drop
-	const DropEventFunc=useCallback((e:DragEvent)=>{
+	// drag-n-drop
+	const DropEventFunc=useCallback((e:React.DragEvent<HTMLDivElement>)=>{
 		e.preventDefault();
-		(documentsCompRef.current!).style.backgroundColor="white";
+		e.currentTarget.style.backgroundColor="white";
 		if(e.dataTransfer?.files){
 			myFileInput.current!.files=e.dataTransfer.files;
 			upload_files();
 		}
 	},[upload_files])
-	useEffect(()=>
-	{
-		documentsCompRef.current!.addEventListener("contextmenu",(e)=>{
-			e.preventDefault();
-			(docsCompContextMenu.current!).style.left=(e.clientX-4)+"px";
-			(docsCompContextMenu.current!).style.top=(e.clientY-4)+"px";
-			(docsCompContextMenu.current!).style.visibility="visible";
-			(docsCompContextMenu.current!).style.height=(docsCompContextMenu.current!).scrollHeight+"px";
-
-		});
-		docsCompContextMenu.current!.addEventListener("mouseleave",(e)=>{
-			e.preventDefault();
-			(docsCompContextMenu.current!).style.height="0px";
-			(docsCompContextMenu.current!).style.visibility="hidden";
-		})
-		documentsCompRef.current!.addEventListener("dragover",(e)=>{
-			e.preventDefault();
-			(documentsCompRef.current!).style.backgroundColor="#c0d1ef";
-		});
-		documentsCompRef.current!.addEventListener("dragleave",(e:DragEvent)=>{
-			e.preventDefault();
-			(documentsCompRef.current!).style.backgroundColor="white";
-		});
+	const ShowContextMenu=useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>,type:string,value:generalDir)=>{
+		e.preventDefault();
+		e.stopPropagation();
+		SetContextContent([true,(e.clientX-4),(e.clientY-4),type,value]);
 	},[])
-	useEffect(() => {
-		const x=documentsCompRef.current!;
-		x.addEventListener("drop",DropEventFunc)
-		return ()=>{
-			x.removeEventListener("drop",DropEventFunc);
-		}
-	}, [DropEventFunc]);
 	
+	return <div id={"documents-page"} onContextMenu={(e)=>ShowContextMenu(e,"Page",{name:""})} onDragOver={(e)=> {
+		e.preventDefault();
+		e.currentTarget.style.backgroundColor = "#c0d1ef"
+	}} onDragLeave={(e)=> {
+		e.preventDefault();
+		e.currentTarget.style.backgroundColor = "white"
+	}} onDropCapture={(e)=>DropEventFunc(e)}>
 
-	return <div id={"documents-page"} ref={documentsCompRef}>
 		<input type={"file"} ref={myFileInput} hidden onChange={upload_files} multiple/>
-		<div ref={docsCompContextMenu} id={"documents-context-menu"}>
-			<div>
-				<AiOutlineFolderAdd size={25}/>
-				<p>New folder</p>
-			</div>
-			<div>
-				<MdUploadFile size={25}/>
-				<p onClick={()=>myFileInput.current?.click()}>File upload</p>
-			</div>
-		</div>
 
+		<div ref={ContextRef} style={{left:ContextMenuContent[1] as number,top:ContextMenuContent[2] as number}} id={"context-menu"} onMouseLeave={(e)=>e.currentTarget.style.height="0px"}>
+			<Context_Menu content={ContextMenuContent} myFileInput={myFileInput} menu={ContextRef} />
+		</div>
 		{Folders.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Folders</p>:<></>}
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <div key={index} title={value.name}>
+					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"Folder",value)}>
 						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-						<BsThreeDotsVertical size={14}/>
+						<div onClick={(e)=>ShowContextMenu(e,"Folder",value)}>
+							<BsThreeDotsVertical size={14}/>
+						</div>
 					</div>
 				})
 			}
@@ -183,9 +156,12 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <div key={index} title={value.name}>
+					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"File",value)}>
 						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-						<BsThreeDotsVertical size={14}/>
+						<div onClick={(e)=>ShowContextMenu(e,"File",value)}>
+							<BsThreeDotsVertical size={14}/>
+						</div>
+
 					</div>
 				})
 			}

@@ -1,3 +1,4 @@
+
 #homepage{
     padding:10px;
     user-select: none;
@@ -35,26 +36,25 @@
     overflow-y: auto;
 
 }
-#documents-context-menu{
+#context-menu{
     background-color: white;
     position: absolute;
     width: 200px;
     box-shadow: black 1px 1px 5px 0 ;
     border-radius: 5px;
-    padding: 5px;
-    visibility: hidden;
     height: 0;
     overflow: hidden;
-    transition: height 0.15s linear;
+    transition: height 0.2s linear;
+
 }
 
-#documents-context-menu>div{
+#context-menu>div{
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 2px 0;
+    padding: 5px 5px;
 }
-#documents-context-menu>div:hover{
+#context-menu>div:hover{
     background-color: #cef1f1;
 }
 
