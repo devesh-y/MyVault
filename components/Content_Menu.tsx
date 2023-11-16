@@ -5,17 +5,10 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { PiShareFill } from "react-icons/pi";
 import { MdDelete } from "react-icons/md";
-import {generalDir} from "./Documents.tsx";
-import {database} from "../utils/firebaseconf.ts";
-import {doc,getDoc} from "firebase/firestore";
-import {useParams} from "react-router-dom";
-import {useSelector} from "react-redux";
-import {StoreType} from "../ReduxStore/store.ts";
-import {User} from "firebase/auth";
+import {generalDir, PromtCont} from "./Documents.tsx";
 
-export const Context_Menu=memo(({content,myFileInput,menu}:{content:(boolean|string|number|generalDir)[],myFileInput:React.RefObject<HTMLInputElement>,menu: React.RefObject<HTMLDivElement>})=>{
-	const {dir_path}=useParams();
-	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo)
+
+export const Context_Menu=memo(({content,myFileInput,menu,SetPromtContent}:{content:(boolean|string|number|generalDir)[],myFileInput:React.RefObject<HTMLInputElement>,menu: React.RefObject<HTMLDivElement>,SetPromtContent:React.Dispatch<React.SetStateAction<PromtCont>>})=>{
 
 	useEffect(() => {
 		if(content[0]){
@@ -24,22 +17,9 @@ export const Context_Menu=memo(({content,myFileInput,menu}:{content:(boolean|str
 	}, [content, menu]);
 
 	const renameFile=useCallback((tempfile:generalDir)=>{
-		const arr=dir_path!.split("/")!;
-		const {email}:User=JSON.parse(UserInfo)
-		let currpath=email!;
-		arr.forEach((value,index,arr)=>{
-			currpath+="/";
-			currpath+=value;
-			if(index<arr.length-1){
-				currpath+="/folders";
-			}
-		})
-		const oldRef=doc(database,currpath+"/files",tempfile.id!)
-		getDoc(oldRef).then((res)=>{
-			console.log(res.data());
-		});
-
-	},[UserInfo, dir_path])
+		
+		SetPromtContent({title:"Rename",topic:"File-Rename",info:tempfile.id!})
+	},[SetPromtContent])
 	if(content[0]){
 		if(content[3]=="File"){
 			return <>
