@@ -15,7 +15,8 @@ import {Context_Menu} from "./Content_Menu.tsx";
 export type generalDir ={
 	name:string,
 	db_url?:string,
-	timestamp?:Date
+	timestamp?:Date,
+	id?:string,
 }
 export const Documents=()=>{
 	const [ContextMenuContent,SetContextContent]=useState([false,0,0,"",{name:""}]); //visible, x,y,type,dirinfo
@@ -44,13 +45,13 @@ export const Documents=()=>{
 			})
 			getDocs(collection(database,finalpath+"/folders")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfolders.push({name:doc.id})
+					tempfolders.push({name:doc.data().name,id:doc.id})
 				})
 				setFolders(tempfolders);
 			})
 			getDocs(collection(database,finalpath+"/files")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfiles.push({name:doc.id,db_url:doc.data().db_url})
+					tempfiles.push({name:doc.data().name,db_url:doc.data().db_url,id:doc.id})
 				})
 				setFiles(tempfiles);
 			})
@@ -92,15 +93,16 @@ export const Documents=()=>{
 			const tempfiles:generalDir[]=[];
 			for(const file of fileList){
 				const filename=file.name;
-				const filePath=email!+"/"+dir_path!+"/"+filename;
+				const its_id=(new Date().getTime()).toString();
+				const filePath=email!+"/"+dir_path!+"/"+its_id;
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",filename),{db_url:url});
-					tempfiles.push({name:filename,db_url:url});
+					await setDoc(doc(database,finalpath+"/files",its_id),{name:filename,db_url:url});
+					tempfiles.push({name:filename,db_url:url,id:its_id});
 				}
 				catch(err){
 					console.log("error in uploading")
@@ -120,6 +122,7 @@ export const Documents=()=>{
 			upload_files();
 		}
 	},[upload_files])
+
 	const ShowContextMenu=useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>,type:string,value:generalDir)=>{
 		e.preventDefault();
 		e.stopPropagation();
@@ -137,7 +140,7 @@ export const Documents=()=>{
 	const openFolder=useCallback((value:generalDir)=>{
 		let finalpath=dir_path!;
 		finalpath+="/";
-		finalpath+=value.name;
+		finalpath+=value.id;
 		finalpath=encodeURIComponent(finalpath);
 		navigate("/"+finalpath);
 	},[dir_path, navigate])
