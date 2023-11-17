@@ -1,4 +1,4 @@
-import {Button, ContextMenu, Dialog, Flex, TextField} from "@radix-ui/themes";
+import {Button, ContextMenu, Dialog, DropdownMenu, Flex, TextField} from "@radix-ui/themes";
 import {useCallback, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
@@ -49,8 +49,25 @@ export const FileDocs=({file_info,openFile,RetrieveDocs}:{file_info:generalDir,o
 					}
 				}>
 					<p style={{width:200,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</p>
-					<div >
-						<BsThreeDotsVertical size={14}/>
+					<div>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<div>
+									<BsThreeDotsVertical size={14}/>
+								</div>
+
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content>
+								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
+								<DropdownMenu.Item >File Info</DropdownMenu.Item>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item >Share</DropdownMenu.Item>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item  color="red">
+									Delete
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 					</div>
 				</div>
 				<Dialog.Root>

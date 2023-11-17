@@ -1,4 +1,4 @@
-import {Button, ContextMenu, Dialog, Flex, TextField} from "@radix-ui/themes";
+import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-ui/themes";
 import {useCallback, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
@@ -50,7 +50,22 @@ export const FolderDocs=({folder_info,openFolder,RetrieveDocs}:{folder_info:gene
 				}>
 					<p style={{width:200,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{folder_info.name}</p>
 					<div>
-						<BsThreeDotsVertical size={14}/>
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<div>
+									<BsThreeDotsVertical size={14}/>
+								</div>
+
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content>
+								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
+								<DropdownMenu.Item >Folder Info</DropdownMenu.Item>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item  color="red">
+									Delete
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
 					</div>
 				</div>
 				<Dialog.Root>
