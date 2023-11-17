@@ -1,5 +1,5 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {collection, getDocs, setDoc, doc, updateDoc} from "firebase/firestore";
+import {collection, getDocs, setDoc, doc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
 import {useEffect, useRef} from "react";
 import {User} from "firebase/auth"
@@ -10,21 +10,16 @@ import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
 import {BsThreeDotsVertical} from "react-icons/bs"
 import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
-import {Context_Menu} from "./Content_Menu.tsx";
-import {Dialog,Button,Flex,TextField} from "@radix-ui/themes"
+import {FileDocs} from "./FileDocs.tsx";
+import {FolderDocs} from "./FolderDocs.tsx"
 export type generalDir ={
 	name:string,
 	db_url?:string,
 	timestamp?:Date,
 	id?:string,
 }
-export type PromtCont={
-	title:string,
-	topic:string,
-	info:string
-}
+
 export const Documents=()=>{
-	const [ContextMenuContent,SetContextContent]=useState([false,0,0,"",{name:""}]); //visible, x,y,type,dirinfo
 	const navigate=useNavigate();
 	const {dir_path}=useParams();
 	const [Files,setFiles]=useState(new Array<generalDir>());
@@ -32,8 +27,6 @@ export const Documents=()=>{
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo)
 	const dispatch=useDispatch();
 	const myFileInput=useRef<HTMLInputElement>(null)
-	const ContextRef=useRef<HTMLDivElement>(null);
-	const ShowPromt=useRef<HTMLButtonElement>(null);
 	//retrieve docs
 	const RetrieveDocs=useCallback( ()=>{
 		if(UserInfo!=""){
@@ -134,11 +127,7 @@ export const Documents=()=>{
 		}
 	},[upload_files])
 
-	const ShowContextMenu=useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>,type:string,value:generalDir)=>{
-		e.preventDefault();
-		e.stopPropagation();
-		SetContextContent([true,(e.clientX-4),(e.clientY-4),type,value]);
-	},[])
+
 
 	const openFile=useCallback((value:generalDir)=>{
 		const a=document.createElement("a");
@@ -155,58 +144,9 @@ export const Documents=()=>{
 		finalpath=encodeURIComponent(finalpath);
 		navigate("/"+finalpath);
 	},[dir_path, navigate])
-	const [PromtContent,SetPromtContent]=useState({title:"",topic:"",info:""});
-	useEffect(() => {
-		if(PromtContent.title!=""){
-			ShowPromt.current!.click();
-		}
-	}, [PromtContent]);
-	const PromtBox=()=>{
-		const [input,setInput]=useState("");
-		const perform_task=useCallback(()=>{
-			if(PromtContent.topic=="File-Rename"){
-				const arr=dir_path!.split("/")!;
-				const {email}:User=JSON.parse(UserInfo)
-				let currpath=email!;
-				arr.forEach((value,index,arr)=>{
-					currpath+="/";
-					currpath+=value;
-					if(index<arr.length-1){
-						currpath+="/folders";
-					}
-				})
-				const oldRef=doc(database,currpath+"/files",PromtContent.info)
-				updateDoc(oldRef, {
-					name: input
-				}).then(()=> {
-					console.log("renamed successfully")
-					RetrieveDocs();
-				});
-			}
-		},[input])
-		return <Dialog.Root>
-			<Dialog.Trigger>
-				<Button ref={ShowPromt} style={{display:"none"}} >Click</Button>
-			</Dialog.Trigger>
-			<Dialog.Content style={{ maxWidth: 450 }}>
-				<Dialog.Title>{PromtContent.title}</Dialog.Title>
-				<TextField.Input value={input} onChange={(e)=>setInput(e.currentTarget.value)} />
-				<Flex gap="3" mt="4" justify="end">
-					<Dialog.Close>
-						<Button variant="soft" color="gray">
-							Cancel
-						</Button>
-					</Dialog.Close>
-					<Dialog.Close>
-						<Button onClick={perform_task}>Save</Button>
-					</Dialog.Close>
-				</Flex>
-			</Dialog.Content>
-		</Dialog.Root>
-	}
 
 
-	return <div id={"documents-page"} onContextMenu={(e)=>ShowContextMenu(e,"Page",{name:""})} onDragOver={(e)=> {
+	return <div id={"documents-page"} onDragOver={(e)=> {
 		e.preventDefault();
 		e.currentTarget.style.backgroundColor = "#c0d1ef"
 	}} onDragLeave={(e)=> {
@@ -214,24 +154,21 @@ export const Documents=()=>{
 		e.currentTarget.style.backgroundColor = "white"
 	}} onDropCapture={(e)=>DropEventFunc(e)}>
 
-		<PromtBox  />
-
 		<input type={"file"} ref={myFileInput} hidden onChange={upload_files} multiple/>
 
-		<div ref={ContextRef} style={{left:ContextMenuContent[1] as number,top:ContextMenuContent[2] as number}} id={"context-menu"} onMouseLeave={(e)=>e.currentTarget.style.height="0px"}>
-			<Context_Menu content={ContextMenuContent} myFileInput={myFileInput} menu={ContextRef} SetPromtContent={SetPromtContent}/>
-		</div>
 		{Folders.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Folders</p>:<></>}
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"Folder",value)}
-								onDoubleClick={()=>openFolder(value)}>
-						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-						<div onClick={(e)=>ShowContextMenu(e,"Folder",value)}>
-							<BsThreeDotsVertical size={14}/>
+					return <FolderDocs key={index}>
+						<div key={index} title={value.name} onDoubleClick={()=>openFolder(value)}>
+							<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
+							<div>
+								<BsThreeDotsVertical size={14}/>
+							</div>
 						</div>
-					</div>
+					</FolderDocs>
+
 				})
 			}
 		</div>
@@ -239,13 +176,7 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <div key={index} title={value.name} onContextMenu={(e)=>ShowContextMenu(e,"File",value)}
-								onDoubleClick={()=>openFile(value)}>
-						<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-						<div onClick={(e)=>ShowContextMenu(e,"File",value)} >
-							<BsThreeDotsVertical size={14}/>
-						</div>
-					</div>
+					return <FileDocs key={index} file_info={value} openFile={openFile} RetrieveDocs={RetrieveDocs} />
 				})
 			}
 		</div>
