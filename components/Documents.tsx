@@ -8,7 +8,7 @@ import {GetCookie} from "../utils/get_set_cookies.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
-import {BsThreeDotsVertical} from "react-icons/bs"
+
 import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
@@ -160,15 +160,7 @@ export const Documents=()=>{
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <FolderDocs key={index}>
-						<div key={index} title={value.name} onDoubleClick={()=>openFolder(value)}>
-							<p style={{width:200,height:20,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{value.name}</p>
-							<div>
-								<BsThreeDotsVertical size={14}/>
-							</div>
-						</div>
-					</FolderDocs>
-
+					return <FolderDocs key={index} folder_info={value} openFolder={openFolder} RetrieveDocs={RetrieveDocs}/>
 				})
 			}
 		</div>
