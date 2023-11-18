@@ -8,7 +8,7 @@ import {GetCookie} from "../utils/get_set_cookies.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
-
+import {SHA256} from "crypto-js";
 import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
@@ -91,16 +91,19 @@ export const Documents=()=>{
 			const tempfiles:generalDir[]=[];
 			for(const file of fileList){
 				const filename=file.name;
-				const its_id=(new Date().getTime()).toString();
-				const filePath=email!+"/"+dir_path!+"/"+its_id;
+				const arr=filename.split('.');
+				const fileext=arr[arr.length-1];
+				const CurrDateTime=(new Date().getTime()).toString();
+				const uniqueId=SHA256(CurrDateTime+email).toString();
+				const filePath=uniqueId+"."+fileext;
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",its_id),{name:filename,db_url:url});
-					tempfiles.push({name:filename,db_url:url,id:its_id});
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url});
+					tempfiles.push({name:filename,db_url:url,id:CurrDateTime});
 				}
 				catch(err){
 					return new Promise((_resolve,reject)=>{
