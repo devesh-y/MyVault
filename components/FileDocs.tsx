@@ -14,7 +14,7 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { GoDownload } from "react-icons/go";
 import { MdOutlineShare } from "react-icons/md";
 import { IoMdInformationCircleOutline } from "react-icons/io";
-
+import { IoCopyOutline } from "react-icons/io5";
 export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
@@ -60,6 +60,13 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 		RetrieveDocs();
 
 	},[RetrieveDocs, UserInfo, dir_path, file_info.access_id, file_info.extension, file_info.id])
+	const copyLinkFunc=useCallback(()=>{
+		navigator.clipboard.writeText(import.meta.env.VITE_WEBSITE+"/access/"+file_info.access_id).then(()=>{
+			console.log("copied successfully");
+		}).catch(()=>{
+			alert("copy fails");
+		})
+	},[file_info.access_id])
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
@@ -97,12 +104,29 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 									</Flex>
 									</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item >
-									<Flex gap={"3"} align={"center"}>
-										<MdOutlineShare/>
-										Share
-									</Flex>
-									</DropdownMenu.Item>
+								<DropdownMenu.Sub>
+									<DropdownMenu.SubTrigger>
+										<Flex gap={"3"} align={"center"}>
+											<MdOutlineShare/>
+											Share
+										</Flex>
+									</DropdownMenu.SubTrigger>
+									<DropdownMenu.SubContent>
+										<DropdownMenu.Item>
+											<Flex gap={"3"} align={"center"}>
+												<MdOutlineShare/>
+												Share
+											</Flex>
+										</DropdownMenu.Item>
+										<DropdownMenu.Item>
+											<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
+												<IoCopyOutline/>
+												Copy link
+											</Flex>
+
+										</DropdownMenu.Item>
+									</DropdownMenu.SubContent>
+								</DropdownMenu.Sub>
 								<DropdownMenu.Item >
 									<Flex gap={"3"} align={"center"}>
 										<IoMdInformationCircleOutline/>
@@ -156,12 +180,32 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 				</Flex>
 				</ContextMenu.Item>
 			<ContextMenu.Separator />
-			<ContextMenu.Item >
-				<Flex gap={"3"} align={"center"}>
-					<MdOutlineShare/>
-					Share
-				</Flex>
-			</ContextMenu.Item>
+
+			<ContextMenu.Sub>
+				<ContextMenu.SubTrigger>
+					<Flex gap={"3"} align={"center"}>
+						<MdOutlineShare/>
+						Share
+					</Flex>
+				</ContextMenu.SubTrigger>
+				<ContextMenu.SubContent>
+					<ContextMenu.Item>
+						<Flex gap={"3"} align={"center"}>
+							<MdOutlineShare/>
+							Share
+						</Flex>
+					</ContextMenu.Item>
+					<ContextMenu.Item>
+						<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
+							<IoCopyOutline/>
+							Copy link
+						</Flex>
+
+					</ContextMenu.Item>
+				</ContextMenu.SubContent>
+			</ContextMenu.Sub>
+
+
 			<ContextMenu.Item>
 				<Flex gap={"3"} align={"center"}>
 					<IoMdInformationCircleOutline/>
