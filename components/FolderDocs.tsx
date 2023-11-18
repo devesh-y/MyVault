@@ -4,7 +4,7 @@ import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
 import {User} from "firebase/auth"
-import {updateDoc,doc} from "firebase/firestore";
+import {updateDoc, doc, deleteDoc} from "firebase/firestore";
 import {database} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
@@ -33,7 +33,25 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 		});
 	},[RetrieveDocs, UserInfo, dir_path, folder_info.id, input])
 	const PromtTrigger=useRef<HTMLButtonElement>(null)
+	const deleteFolderFunc=useCallback(()=>{
+		const arr=dir_path!.split("/")!;
+		const {email}:User=JSON.parse(UserInfo)
+		let currpath=email!;
+		arr.forEach((value,index,arr)=>{
+			currpath+="/";
+			currpath+=value;
+			if(index<arr.length-1){
+				currpath+="/folders";
+			}
+		})
+		deleteDoc(doc(database,currpath+"/folders",folder_info.id!)).then(()=>{
+			console.log("folder deleted");
+			RetrieveDocs();
+		}).catch(()=>{
+			console.log("error in deleting folder");
+		})
 
+	},[RetrieveDocs, UserInfo, dir_path, folder_info.id])
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
@@ -61,7 +79,7 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
 								<DropdownMenu.Item >Folder Info</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item  color="red">
+								<DropdownMenu.Item  color="red" onClick={deleteFolderFunc}>
 									Delete
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
@@ -94,7 +112,7 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</ContextMenu.Item>
 			<ContextMenu.Item>Folder Info</ContextMenu.Item>
 			<ContextMenu.Separator />
-			<ContextMenu.Item  color="red">
+			<ContextMenu.Item  color="red" onClick={deleteFolderFunc}>
 				Delete
 			</ContextMenu.Item>
 		</ContextMenu.Content>
