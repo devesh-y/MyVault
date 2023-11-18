@@ -1,5 +1,5 @@
 import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-ui/themes";
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useRef, useState,memo} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
@@ -9,7 +9,7 @@ import {database} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 
-export const FolderDocs=({folder_info,openFolder,RetrieveDocs}:{folder_info:generalDir,openFolder:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
+export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info:generalDir,openFolder:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [input,setInput]=useState("");
@@ -99,5 +99,5 @@ export const FolderDocs=({folder_info,openFolder,RetrieveDocs}:{folder_info:gene
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
-}
+})
 

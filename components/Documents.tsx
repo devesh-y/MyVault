@@ -12,6 +12,7 @@ import {SHA256} from "crypto-js";
 import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
+import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
 export type generalDir ={
 	name:string,
 	db_url?:string,
@@ -148,7 +149,29 @@ export const Documents=()=>{
 		finalpath=encodeURIComponent(finalpath);
 		navigate("/"+finalpath);
 	},[dir_path, navigate])
-
+	const [newFolderName,setNewFolderName]=useState("");
+	const createNewFolderfunc=useCallback(()=>{
+		const {email}:User=JSON.parse(UserInfo)
+		let finalpath=email!;
+		const pathArray=dir_path!.split('/');
+		pathArray.forEach((value,index,pathArray)=>{
+			finalpath+="/"+value;
+			if(index<pathArray.length-1)
+			{
+				finalpath+="/folders";
+			}
+		})
+		const CurrDateTime=(new Date().getTime()).toString();
+		if(newFolderName!=""){
+			setDoc(doc(database,finalpath+"/folders",CurrDateTime),{name:newFolderName}).then(()=>{
+				console.log("folder created successfully");
+				setFolders([...Folders,{name:newFolderName,id:CurrDateTime}]);
+				setNewFolderName("");
+			}).catch(()=>{
+				console.log("error in folder creation");
+			})
+		}
+	},[Folders, UserInfo, dir_path, newFolderName]);
 
 	return <div id={"documents-page"} onDragOver={(e)=> {
 		e.preventDefault();
@@ -157,6 +180,35 @@ export const Documents=()=>{
 		e.preventDefault();
 		e.currentTarget.style.backgroundColor = "white"
 	}} onDropCapture={(e)=>DropEventFunc(e)}>
+
+		<Flex gap="3">
+
+			<Dialog.Root>
+				<Dialog.Trigger>
+					<Button color="crimson" variant="soft">
+						New Folder
+					</Button>
+				</Dialog.Trigger>
+
+				<Dialog.Content style={{ maxWidth: 450 }}>
+					<Dialog.Title>New Folder</Dialog.Title>
+					<TextField.Input value={newFolderName} onChange={(e)=>setNewFolderName(e.currentTarget.value)}/>
+					<Flex gap="3" mt="4" justify="end">
+						<Dialog.Close>
+							<Button variant="soft" color="gray">
+								Cancel
+							</Button>
+						</Dialog.Close>
+						<Dialog.Close>
+							<Button onClick={createNewFolderfunc}>Save</Button>
+						</Dialog.Close>
+					</Flex>
+				</Dialog.Content>
+			</Dialog.Root>
+			<Button color="orange" variant="soft" onClick={()=>myFileInput.current!.click()}>
+				Upload File
+			</Button>
+		</Flex>
 
 		<input type={"file"} ref={myFileInput} hidden onChange={upload_files} multiple/>
 

@@ -1,5 +1,5 @@
 import {Button, ContextMenu, Dialog, DropdownMenu, Flex, TextField} from "@radix-ui/themes";
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useRef, useState,memo} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
@@ -9,7 +9,7 @@ import {database} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 
-export const FileDocs=({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
+export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [input,setInput]=useState("");
@@ -59,9 +59,10 @@ export const FileDocs=({file_info,openFile,RetrieveDocs}:{file_info:generalDir,o
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content>
 								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
-								<DropdownMenu.Item >File Info</DropdownMenu.Item>
+								<DropdownMenu.Item onClick={()=>openFile(file_info)}  >Download</DropdownMenu.Item>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item >Share</DropdownMenu.Item>
+								<DropdownMenu.Item >File Info</DropdownMenu.Item>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item  color="red">
 									Delete
@@ -94,13 +95,14 @@ export const FileDocs=({file_info,openFile,RetrieveDocs}:{file_info:generalDir,o
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
 			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</ContextMenu.Item>
-			<ContextMenu.Item>File Info</ContextMenu.Item>
+			<ContextMenu.Item onClick={()=>openFile(file_info)} >Download</ContextMenu.Item>
 			<ContextMenu.Separator />
 			<ContextMenu.Item >Share</ContextMenu.Item>
+			<ContextMenu.Item>File Info</ContextMenu.Item>
 			<ContextMenu.Separator />
 			<ContextMenu.Item  color="red">
 				Delete
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
-}
+})
