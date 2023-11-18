@@ -91,23 +91,23 @@ export const Documents=()=>{
 			})
 			
 			const fileList=myFileInput.current.files;
-			const tempfiles:generalDir[]=[];
+			const tempFiles:generalDir[]=[];
 			for(const file of fileList){
 				const filename=file.name;
 				const arr=filename.split('.');
-				const fileext=arr[arr.length-1];
+				const fileExt=arr[arr.length-1];
 				const CurrDateTime=(new Date().getTime()).toString();
 				const uniqueId=SHA256(CurrDateTime+email).toString();
-				const filePath=uniqueId+"."+fileext;
+				const filePath=uniqueId+"."+fileExt;
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId,extension:fileext});
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId,extension:fileExt});
 					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,db_url:url,allowed_users:[]})
-					tempfiles.push({name:filename,db_url:url,id:CurrDateTime});
+					tempFiles.push({name:filename,db_url:url,id:CurrDateTime});
 				}
 				catch(err){
 					return new Promise((_resolve,reject)=>{
@@ -116,7 +116,7 @@ export const Documents=()=>{
 
 				}
 			}
-			setFiles([...Files,...tempfiles]);
+			setFiles([...Files,...tempFiles]);
 			return new Promise((resolve)=>{
 				resolve("all files uploaded")
 			})

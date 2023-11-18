@@ -9,6 +9,11 @@ import {database,fireStorage} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import {ref,deleteObject} from "firebase/storage";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import { GoDownload } from "react-icons/go";
+import { MdOutlineShare } from "react-icons/md";
+import { IoMdInformationCircleOutline } from "react-icons/io";
 
 export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
@@ -79,14 +84,37 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content>
-								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
-								<DropdownMenu.Item onClick={()=>openFile(file_info)}  >Download</DropdownMenu.Item>
+								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >
+									<Flex gap={"3"} align={"center"}>
+										<MdOutlineDriveFileRenameOutline/>
+										Rename
+									</Flex>
+								</DropdownMenu.Item>
+								<DropdownMenu.Item onClick={()=>openFile(file_info)}  >
+									<Flex gap={"3"} align={"center"}>
+										<GoDownload/>
+										Download
+									</Flex>
+									</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item >Share</DropdownMenu.Item>
-								<DropdownMenu.Item >File Info</DropdownMenu.Item>
+								<DropdownMenu.Item >
+									<Flex gap={"3"} align={"center"}>
+										<MdOutlineShare/>
+										Share
+									</Flex>
+									</DropdownMenu.Item>
+								<DropdownMenu.Item >
+									<Flex gap={"3"} align={"center"}>
+										<IoMdInformationCircleOutline/>
+										File Info
+									</Flex>
+									</DropdownMenu.Item>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item  color="red" onClick={deleteFileFunc}>
-									Delete
+									<Flex gap={"3"} align={"center"}>
+										<RiDeleteBin6Line/>
+										Delete
+									</Flex>
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
@@ -115,14 +143,37 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
-			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</ContextMenu.Item>
-			<ContextMenu.Item onClick={()=>openFile(file_info)} >Download</ContextMenu.Item>
+			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >
+				<Flex gap={"3"} align={"center"}>
+					<MdOutlineDriveFileRenameOutline/>
+					Rename
+				</Flex>
+			</ContextMenu.Item>
+			<ContextMenu.Item onClick={()=>openFile(file_info)} >
+				<Flex gap={"3"} align={"center"}>
+					<GoDownload/>
+					Download
+				</Flex>
+				</ContextMenu.Item>
 			<ContextMenu.Separator />
-			<ContextMenu.Item >Share</ContextMenu.Item>
-			<ContextMenu.Item>File Info</ContextMenu.Item>
+			<ContextMenu.Item >
+				<Flex gap={"3"} align={"center"}>
+					<MdOutlineShare/>
+					Share
+				</Flex>
+			</ContextMenu.Item>
+			<ContextMenu.Item>
+				<Flex gap={"3"} align={"center"}>
+					<IoMdInformationCircleOutline/>
+					File Info
+				</Flex>
+				</ContextMenu.Item>
 			<ContextMenu.Separator />
 			<ContextMenu.Item  color="red"  onClick={deleteFileFunc}>
-				Delete
+				<Flex gap={"3"} align={"center"}>
+					<RiDeleteBin6Line/>
+					Delete
+				</Flex>
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>

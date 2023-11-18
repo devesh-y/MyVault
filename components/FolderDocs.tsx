@@ -8,6 +8,9 @@ import {updateDoc, doc, deleteDoc} from "firebase/firestore";
 import {database} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
+import {RiDeleteBin6Line} from "react-icons/ri";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import {IoMdInformationCircleOutline} from "react-icons/io";
 
 export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info:generalDir,openFolder:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
@@ -76,11 +79,24 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content>
-								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</DropdownMenu.Item>
-								<DropdownMenu.Item >Folder Info</DropdownMenu.Item>
+								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >
+									<Flex gap={"3"} align={"center"}>
+									<MdOutlineDriveFileRenameOutline />
+									Rename
+									</Flex>
+								</DropdownMenu.Item>
+								<DropdownMenu.Item >
+									<Flex gap={"3"} align={"center"}>
+									<IoMdInformationCircleOutline/>
+									Folder Info
+									</Flex>
+									</DropdownMenu.Item>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item  color="red" onClick={deleteFolderFunc}>
+									<Flex gap={"3"} align={"center"}>
+									<RiDeleteBin6Line/>
 									Delete
+									</Flex>
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
 						</DropdownMenu.Root>
@@ -109,11 +125,24 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
-			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >Rename</ContextMenu.Item>
-			<ContextMenu.Item>Folder Info</ContextMenu.Item>
+			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >
+				<Flex gap={"3"} align={"center"}>
+				<MdOutlineDriveFileRenameOutline/>
+				Rename
+				</Flex>
+			</ContextMenu.Item>
+			<ContextMenu.Item>
+				<Flex gap={"3"} align={"center"}>
+				<IoMdInformationCircleOutline/>
+				Folder Info
+				</Flex>
+				</ContextMenu.Item>
 			<ContextMenu.Separator />
 			<ContextMenu.Item  color="red" onClick={deleteFolderFunc}>
+				<Flex gap={"3"} align={"center"}>
+				<RiDeleteBin6Line/>
 				Delete
+				</Flex>
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
