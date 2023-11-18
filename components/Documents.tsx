@@ -102,7 +102,8 @@ export const Documents=()=>{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url});
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId});
+					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,db_url:url,allowed_users:[]})
 					tempfiles.push({name:filename,db_url:url,id:CurrDateTime});
 				}
 				catch(err){
