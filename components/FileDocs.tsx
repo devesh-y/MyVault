@@ -4,10 +4,11 @@ import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
 import {User} from "firebase/auth"
-import {updateDoc,doc} from "firebase/firestore";
-import {database} from "../utils/firebaseconf.ts";
+import {updateDoc,doc,deleteDoc} from "firebase/firestore";
+import {database,fireStorage} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
+import {ref,deleteObject} from "firebase/storage";
 
 export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
@@ -33,7 +34,27 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 		});
 	},[RetrieveDocs, UserInfo, dir_path, file_info.id, input])
 	const PromtTrigger=useRef<HTMLButtonElement>(null)
+	const deleteFileFunc=useCallback(async ()=>{
+		const arr=dir_path!.split("/")!;
+		const {email}:User=JSON.parse(UserInfo)
+		let currpath=email!;
+		arr.forEach((value,index,arr)=>{
+			currpath+="/";
+			currpath+=value;
+			if(index<arr.length-1){
+				currpath+="/folders";
+			}
+		})
+		//delete from files database
+		await deleteDoc(doc(database,currpath+"/files",file_info.id!))
+		//delete from access_db
+		await deleteDoc(doc(database,"access_files_db",file_info.access_id!))
+		//delete from storage
+		const deleteRef=ref(fireStorage,file_info.access_id+"."+file_info.extension);
+		await deleteObject(deleteRef)
+		RetrieveDocs();
 
+	},[RetrieveDocs, UserInfo, dir_path, file_info.access_id, file_info.extension, file_info.id])
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
@@ -64,7 +85,7 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 								<DropdownMenu.Item >Share</DropdownMenu.Item>
 								<DropdownMenu.Item >File Info</DropdownMenu.Item>
 								<DropdownMenu.Separator />
-								<DropdownMenu.Item  color="red">
+								<DropdownMenu.Item  color="red" onClick={deleteFileFunc}>
 									Delete
 								</DropdownMenu.Item>
 							</DropdownMenu.Content>
@@ -100,7 +121,7 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 			<ContextMenu.Item >Share</ContextMenu.Item>
 			<ContextMenu.Item>File Info</ContextMenu.Item>
 			<ContextMenu.Separator />
-			<ContextMenu.Item  color="red">
+			<ContextMenu.Item  color="red"  onClick={deleteFileFunc}>
 				Delete
 			</ContextMenu.Item>
 		</ContextMenu.Content>

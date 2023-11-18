@@ -18,6 +18,8 @@ export type generalDir ={
 	db_url?:string,
 	timestamp?:Date,
 	id?:string,
+	access_id?:string,
+	extension?:string
 }
 
 export const Documents=()=>{
@@ -51,7 +53,7 @@ export const Documents=()=>{
 			})
 			getDocs(collection(database,finalpath+"/files")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfiles.push({name:doc.data().name,db_url:doc.data().db_url,id:doc.id})
+					tempfiles.push({name:doc.data().name,db_url:doc.data().db_url,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension})
 				})
 				setFiles(tempfiles);
 			})
@@ -103,7 +105,7 @@ export const Documents=()=>{
 					const snapshot=await uploadBytes(storeRef,file);
 					console.log("uploaded")
 					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId});
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId,extension:fileext});
 					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,db_url:url,allowed_users:[]})
 					tempfiles.push({name:filename,db_url:url,id:CurrDateTime});
 				}
