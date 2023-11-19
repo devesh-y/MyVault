@@ -1,6 +1,6 @@
 import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-ui/themes";
 import {useCallback, useRef, useState,memo} from "react";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
 import {User} from "firebase/auth"
@@ -12,10 +12,11 @@ import {RiDeleteBin6Line} from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import {IoMdInformationCircleOutline} from "react-icons/io";
 
-export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info:generalDir,openFolder:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
+export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [input,setInput]=useState("");
+	const navigate=useNavigate();
 	const rename_folder_func=useCallback( ()=>{
 		const arr=dir_path!.split("/")!;
 		const {email}:User=JSON.parse(UserInfo)
@@ -35,6 +36,13 @@ export const FolderDocs=memo(({folder_info,openFolder,RetrieveDocs}:{folder_info
 			RetrieveDocs();
 		});
 	},[RetrieveDocs, UserInfo, dir_path, folder_info.id, input])
+	const openFolder=useCallback((value:generalDir)=>{
+		let finalpath=dir_path!;
+		finalpath+="/";
+		finalpath+=value.id;
+		finalpath=encodeURIComponent(finalpath);
+		navigate("/"+finalpath);
+	},[dir_path, navigate])
 	const PromtTrigger=useRef<HTMLButtonElement>(null)
 	const deleteFolderFunc=useCallback(()=>{
 		const arr=dir_path!.split("/")!;

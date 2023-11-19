@@ -9,14 +9,14 @@ import {database,fireStorage} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import { IoAdd } from "react-icons/io5";
-import {ref,deleteObject} from "firebase/storage";
+import {ref, deleteObject, getBlob} from "firebase/storage";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { GoDownload } from "react-icons/go";
 import { MdOutlineShare } from "react-icons/md";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { IoCopyOutline } from "react-icons/io5";
-export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:generalDir,openFile:(value: generalDir) => void,RetrieveDocs:()=>void})=>{
+export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,RetrieveDocs:()=>void})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [input,setInput]=useState("");
@@ -39,6 +39,22 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 			RetrieveDocs();
 		});
 	},[RetrieveDocs, UserInfo, dir_path, file_info.id, input])
+
+
+	const openFile=useCallback((value:generalDir,toDownload:boolean)=>{
+
+		getBlob(ref(fireStorage,value.access_id!+"."+value.extension!)).then((blob)=>{
+			const a=document.createElement("a");
+			a.href=URL.createObjectURL(blob);
+			a.target="_blank"
+			if(toDownload){
+				a.download=value.name;
+			}
+			a.click();
+		})
+
+	},[])
+
 	const RenamePromtTrigger=useRef<HTMLButtonElement>(null)
 	const SharePromtTrigger=useRef<HTMLButtonElement>(null);
 	const deleteFileFunc=useCallback(async ()=>{
@@ -160,7 +176,7 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
-				<div title={file_info.name}  onDoubleClick={()=>openFile(file_info)} style={
+				<div title={file_info.name}  onDoubleClick={()=>openFile(file_info,false)} style={
 					{
 						width:"fit-content",
 						borderRadius: "10px",
@@ -187,7 +203,7 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 										Rename
 									</Flex>
 								</DropdownMenu.Item>
-								<DropdownMenu.Item onClick={()=>openFile(file_info)}  >
+								<DropdownMenu.Item onClick={()=>openFile(file_info,true)}  >
 									<Flex gap={"3"} align={"center"}>
 										<GoDownload/>
 										Download
@@ -333,7 +349,7 @@ export const FileDocs=memo(({file_info,openFile,RetrieveDocs}:{file_info:general
 					Rename
 				</Flex>
 			</ContextMenu.Item>
-			<ContextMenu.Item onClick={()=>openFile(file_info)} >
+			<ContextMenu.Item onClick={()=>openFile(file_info,true)} >
 				<Flex gap={"3"} align={"center"}>
 					<GoDownload/>
 					Download

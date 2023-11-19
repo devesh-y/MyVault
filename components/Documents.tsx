@@ -9,13 +9,12 @@ import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
 import {SHA256} from "crypto-js";
-import {ref, uploadBytes,getDownloadURL} from "firebase/storage";
+import {ref, uploadBytes} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
 import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
 export type generalDir ={
 	name:string,
-	db_url?:string,
 	timestamp?:Date,
 	id?:string,
 	access_id?:string,
@@ -53,7 +52,7 @@ export const Documents=()=>{
 			})
 			getDocs(collection(database,finalpath+"/files")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfiles.push({name:doc.data().name,db_url:doc.data().db_url,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension})
+					tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension})
 				})
 				setFiles(tempfiles);
 			})
@@ -107,12 +106,12 @@ export const Documents=()=>{
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
-					const snapshot=await uploadBytes(storeRef,file);
+					await uploadBytes(storeRef,file);
 					console.log("uploaded")
-					const url=await getDownloadURL(snapshot.ref);
-					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,db_url:url,access_id:uniqueId,extension:fileExt});
-					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,db_url:url,allowed_users:[]})
-					tempFiles.push({name:filename,db_url:url,id:CurrDateTime});
+
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,access_id:uniqueId,extension:fileExt});
+					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,allowed_users:[],extension:fileExt})
+					tempFiles.push({name:filename,id:CurrDateTime});
 				}
 				catch(err){
 					return new Promise((_resolve,reject)=>{
@@ -140,22 +139,6 @@ export const Documents=()=>{
 	},[upload_files])
 
 
-
-	const openFile=useCallback((value:generalDir)=>{
-		const a=document.createElement("a");
-		a.download=value.name;
-		a.href=value.db_url!;
-		a.target="_blank";
-		a.click();
-	},[])
-	
-	const openFolder=useCallback((value:generalDir)=>{
-		let finalpath=dir_path!;
-		finalpath+="/";
-		finalpath+=value.id;
-		finalpath=encodeURIComponent(finalpath);
-		navigate("/"+finalpath);
-	},[dir_path, navigate])
 	const [newFolderName,setNewFolderName]=useState("");
 	const createNewFolderfunc=useCallback(()=>{
 		const {email}:User=JSON.parse(UserInfo)
@@ -223,7 +206,7 @@ export const Documents=()=>{
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <FolderDocs key={index} folder_info={value} openFolder={openFolder} RetrieveDocs={RetrieveDocs}/>
+					return <FolderDocs key={index} folder_info={value} RetrieveDocs={RetrieveDocs}/>
 				})
 			}
 		</div>
@@ -231,7 +214,7 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <FileDocs key={index} file_info={value} openFile={openFile} RetrieveDocs={RetrieveDocs} />
+					return <FileDocs key={index} file_info={value} RetrieveDocs={RetrieveDocs} />
 				})
 			}
 		</div>
