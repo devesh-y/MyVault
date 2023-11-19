@@ -71,11 +71,16 @@ export const Documents=()=>{
 			navigate('/login',{replace:true});
 		}
 		else{
-			dispatch(setUserInfo(response))
-			RetrieveDocs();
+			if(dir_path!.substring(0,4)=="root"){
+				dispatch(setUserInfo(response))
+				RetrieveDocs();
+			}
+			else{
+				navigate("/wrong_page",{replace:true});
+			}
 		}
 
-	},[RetrieveDocs, UserInfo, dispatch, navigate, response])
+	},[RetrieveDocs, UserInfo, dir_path, dispatch, navigate, response])
 
 	const upload_files=useCallback(async()=>{
 		if(myFileInput.current?.files){
