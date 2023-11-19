@@ -1,19 +1,33 @@
-# MyVault - Google Drive Clone
+# Cloud Storage App
 
-Welcome to MyVault, your personal cloud storage solution built on the  ( Express.js, React.js,FireBase) stack. MyVault is designed to provide a seamless experience for storing and managing your files with the added convenience of Google Login and Firebase storage.
+## Overview
+
+This project is a feature-rich cloud storage platform developed using React and Firebase, offering a comprehensive cloud storage solution with advanced functionalities. Users can upload and download files, create folders, and seamlessly manage their data in a collaborative environment.
 
 ## Features
 
-1. **Google Login Integration:** Securely log in to MyVault using your Google account for a streamlined and secure authentication process.
+- **File Management:**
+    - Upload and download files effortlessly.
+    - Intuitive drag-and-drop feature for easy file upload.
+    - Create, view, and organize folders for efficient data management.
 
-2. **Firebase Storage:** Benefit from reliable and scalable cloud storage with Firebase. Your files are securely stored and easily accessible whenever you need them.
+- **Collaborative Sharing:**
+    - Share file links with specific access permissions.
+    - Selectively grant or restrict access to files for enhanced collaboration.
 
-3. **Drag and Drop Interface:** Simplify file uploads and organization with the intuitive drag and drop feature. Effortlessly rearrange and manage your files within MyVault.
+- **User Interface:**
+    - Modern and responsive UI designed with Radix UI library.
+    - Intuitive navigation for a user-friendly experience.
 
-## Prerequisites
+- **Security:**
+    - Firebase authentication for secure user access.
+    - Granular control over shared file access to protect sensitive data.
 
-Before you start using MyVault, ensure you have the following dependencies installed:
-- Node.js and npm
-- Firebase Account with Storage enabled
+## Tech Stack
 
+- **Frontend:**
+    - React for the user interface.
+    - Radix UI library for modern and responsive components.
 
+- **Backend:**
+    - Firebase for cloud storage and authentication.
