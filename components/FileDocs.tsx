@@ -292,7 +292,7 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 						<ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: 100 }}  >
 							{AlreadyAllowedUsers.length==0?<Text size={"2"}>None</Text>:<></>}
 							{AlreadyAllowedUsers.map((email,index)=>{
-								return <Flex key={index} align={"center"} justify={"between"} pr={"2"} mb={"2"}>
+								return <Flex key={index+(file_info.access_id?file_info.access_id:"")} align={"center"} justify={"between"} pr={"2"} mb={"2"}>
 									<Text size={"2"}>{email=="*"?"Everyone":email}</Text>
 									<Button color="crimson" variant="soft" onClick={()=>RevokeAccessUser(email)}>Revoke</Button>
 								</Flex>

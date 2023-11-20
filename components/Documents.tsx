@@ -209,7 +209,7 @@ export const Documents=()=>{
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <FolderDocs key={index} folder_info={value} RetrieveDocs={RetrieveDocs}/>
+					return <FolderDocs key={index+(dir_path?dir_path:"")} folder_info={value} RetrieveDocs={RetrieveDocs}/>
 				})
 			}
 		</div>
@@ -217,7 +217,7 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <FileDocs key={index} file_info={value} RetrieveDocs={RetrieveDocs} />
+					return <FileDocs key={index+(dir_path?dir_path:"")} file_info={value} RetrieveDocs={RetrieveDocs} />
 				})
 			}
 		</div>
