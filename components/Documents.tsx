@@ -1,9 +1,9 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {collection, getDocs, setDoc, doc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
-import {useEffect, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 import {User} from "firebase/auth"
-import React,{useCallback, useMemo, useState} from "react";
+import React,{useCallback, useState} from "react";
 import {GetCookie} from "../utils/get_set_cookies.ts";
 import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
@@ -66,12 +66,15 @@ export const Documents=()=>{
 	},[])
 	//page routing if cookie not available
 	useEffect(()=>{
+		
 		if(!response){
 			navigate('/login',{replace:true});
 		}
 		else{
-			if(dir_path!.substring(0,4)=="root"){
-				dispatch(setUserInfo(response))
+			if(UserInfo==""){
+				dispatch(setUserInfo(response));
+			}
+			else if(dir_path!.substring(0,4)=="root"){
 				RetrieveDocs();
 			}
 			else{

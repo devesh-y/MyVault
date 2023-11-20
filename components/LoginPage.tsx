@@ -14,8 +14,8 @@ function SignIn(navigate:NavigateFunction,dispatch:Dispatch){
 	HandleLogin().then((res)=>{
 
 		const user=JSON.stringify(res);
-		dispatch(setUserInfo(user));
 		SetCookie(user);
+		dispatch(setUserInfo(user));
 		navigate("/root", {replace: true });
 
 	}).catch((err)=>{

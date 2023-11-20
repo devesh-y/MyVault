@@ -41,7 +41,7 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 		finalpath+="/";
 		finalpath+=value.id;
 		finalpath=encodeURIComponent(finalpath);
-		navigate("/"+finalpath);
+		navigate("/"+finalpath,{replace:true});
 	},[dir_path, navigate])
 	const PromtTrigger=useRef<HTMLButtonElement>(null)
 	const deleteFolderFunc=useCallback(()=>{

@@ -277,7 +277,7 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 						<button hidden={true} ref={SharePromtTrigger}></button>
 					</Dialog.Trigger>
 
-					<Dialog.Content style={{ maxWidth: 450 }}>
+					<Dialog.Content onOpenAutoFocus={(e)=>e.preventDefault()} style={{ maxWidth: 450 }}>
 						<Dialog.Title>Share {file_info.name}</Dialog.Title>
 						<TextField.Root>
 							<TextField.Input placeholder="Add user email" size="2" value={addUserEmail} onChange={(e)=>setAddUserEmail(e.currentTarget.value)}/>
