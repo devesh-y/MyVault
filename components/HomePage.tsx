@@ -12,7 +12,7 @@ const CurrentPath=()=>{
 				temp+=value;
 				return <span key={index} style={{display:"flex",alignItems:"center",gap:10}} >
 					<span> {">"} </span>
-					<span><Link to={"/"+encodeURIComponent(temp.substring(1))} replace={true}>{`F${index+1}`}</Link> </span>
+					<span><Link to={"/"+encodeURIComponent(temp.substring(1))}>{`F${index+1}`}</Link> </span>
 				</span>
 
 			})
