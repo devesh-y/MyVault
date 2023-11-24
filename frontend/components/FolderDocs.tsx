@@ -1,21 +1,21 @@
 import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-ui/themes";
-import {useCallback, useRef, useState,memo} from "react";
+import React, {useCallback, useRef, useState,memo} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
 import {User} from "firebase/auth"
-import {updateDoc, doc, deleteDoc} from "firebase/firestore";
+import {updateDoc, doc, deleteDoc, getDoc} from "firebase/firestore";
 import {database} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import {RiDeleteBin6Line} from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
-import {IoMdInformationCircleOutline} from "react-icons/io";
+// import {IoMdInformationCircleOutline} from "react-icons/io";
 
-export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir,RetrieveDocs:()=>void})=>{
+export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
-	const [input,setInput]=useState("");
+	const [inputRename,setInputRename]=useState("");
 	const navigate=useNavigate();
 	const rename_folder_func=useCallback( ()=>{
 		const arr=dir_path!.split("/")!;
@@ -29,13 +29,27 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 			}
 		})
 		const oldRef=doc(database,currpath+"/folders",folder_info.id!)
-		updateDoc(oldRef, {
-			name: input
-		}).then(()=> {
-			console.log("renamed successfully")
-			RetrieveDocs();
-		});
-	},[RetrieveDocs, UserInfo, dir_path, folder_info.id, input])
+		getDoc(oldRef).then((doc)=>{
+			if(doc.exists()){
+				updateDoc(oldRef, {
+					name: inputRename
+				}).then(()=> {
+					console.log("renamed successfully")
+					const index=Folders.indexOf(folder_info);
+					if(index!=-1){
+						const temp=Array.from(Folders);
+						temp.splice(index,1);
+						const newvalues=folder_info;
+						newvalues.name=inputRename;
+						temp.splice(index,0,newvalues);
+						setFolders(temp);
+						setInputRename("");
+					}
+				});
+			}
+		})
+
+	},[Folders, UserInfo, dir_path, folder_info, inputRename, setFolders])
 	const openFolder=useCallback((value:generalDir)=>{
 		let finalpath=dir_path!;
 		finalpath+="/";
@@ -57,12 +71,17 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 		})
 		deleteDoc(doc(database,currpath+"/folders",folder_info.id!)).then(()=>{
 			console.log("folder deleted");
-			RetrieveDocs();
+			const index=Folders.indexOf(folder_info);
+			if(index!=-1){
+				const temp=Array.from(Folders);
+				temp.splice(index,1);
+				setFolders(temp);
+			}
 		}).catch(()=>{
 			console.log("error in deleting folder");
 		})
 
-	},[RetrieveDocs, UserInfo, dir_path, folder_info.id])
+	},[Folders, UserInfo, dir_path, folder_info, setFolders])
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
@@ -93,12 +112,12 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 									Rename
 									</Flex>
 								</DropdownMenu.Item>
-								<DropdownMenu.Item >
-									<Flex gap={"3"} align={"center"}>
-									<IoMdInformationCircleOutline/>
-									Folder Info
-									</Flex>
-									</DropdownMenu.Item>
+								{/*<DropdownMenu.Item >*/}
+								{/*	<Flex gap={"3"} align={"center"}>*/}
+								{/*	<IoMdInformationCircleOutline/>*/}
+								{/*	Folder Info*/}
+								{/*	</Flex>*/}
+								{/*</DropdownMenu.Item>*/}
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item  color="red" onClick={deleteFolderFunc}>
 									<Flex gap={"3"} align={"center"}>
@@ -116,7 +135,7 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 					</Dialog.Trigger>
 					<Dialog.Content style={{ maxWidth: 450 }}>
 						<Dialog.Title>Rename</Dialog.Title>
-						<TextField.Input placeholder="..." value={input} onChange={(e)=>setInput(e.currentTarget.value)}/>
+						<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
 						<Flex gap="3" mt="4" justify="end">
 							<Dialog.Close>
 								<Button variant="soft" color="gray">
@@ -139,12 +158,12 @@ export const FolderDocs=memo(({folder_info,RetrieveDocs}:{folder_info:generalDir
 				Rename
 				</Flex>
 			</ContextMenu.Item>
-			<ContextMenu.Item>
-				<Flex gap={"3"} align={"center"}>
-				<IoMdInformationCircleOutline/>
-				Folder Info
-				</Flex>
-				</ContextMenu.Item>
+			{/*<ContextMenu.Item>*/}
+			{/*	<Flex gap={"3"} align={"center"}>*/}
+			{/*	<IoMdInformationCircleOutline/>*/}
+			{/*	Folder Info*/}
+			{/*	</Flex>*/}
+			{/*</ContextMenu.Item>*/}
 			<ContextMenu.Separator />
 			<ContextMenu.Item  color="red" onClick={deleteFolderFunc}>
 				<Flex gap={"3"} align={"center"}>

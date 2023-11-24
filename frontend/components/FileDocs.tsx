@@ -1,5 +1,5 @@
 import {Button, ContextMenu, Dialog, DropdownMenu, Flex, TextField, Text, IconButton, ScrollArea} from "@radix-ui/themes";
-import {useCallback, useRef, useState,memo} from "react";
+import React, {useCallback, useRef, useState,memo} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {StoreType} from "../ReduxStore/store.ts";
@@ -9,17 +9,24 @@ import {database,fireStorage} from "../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import { IoAdd } from "react-icons/io5";
-import {ref, deleteObject, getBlob} from "firebase/storage";
+import {ref, deleteObject} from "firebase/storage";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { GoDownload } from "react-icons/go";
 import { MdOutlineShare } from "react-icons/md";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { IoCopyOutline } from "react-icons/io5";
-export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,RetrieveDocs:()=>void})=>{
+export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,setFiles:React.Dispatch<React.SetStateAction<generalDir[]>>,Files:generalDir[]})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
-	const [input,setInput]=useState("");
+	const [inputRename,setInputRename]=useState("");
+	const RenamePromtTrigger=useRef<HTMLButtonElement>(null)
+	const SharePromtTrigger=useRef<HTMLButtonElement>(null);
+	const [addUserEmail,setAddUserEmail]=useState("");
+	const promtdownloadedfile=useRef<HTMLButtonElement>(null);
+	const [downloadInputUrl,setDownloadInputUrl]=useState<undefined|string>(undefined);
+	const [AlreadyAllowedUsers,SetAllowedUsers]=useState(new Array<string>());
+	const [DownloadProgress,setDownloadProgress]=useState(0);
 	const rename_file_func=useCallback( ()=>{
 		const arr=dir_path!.split("/")!;
 		const {email}:User=JSON.parse(UserInfo)
@@ -32,32 +39,97 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 			}
 		})
 		const oldRef=doc(database,currpath+"/files",file_info.id!)
-		updateDoc(oldRef, {
-			name: input
-		}).then(()=> {
-			console.log("renamed successfully")
-			RetrieveDocs();
-		});
-	},[RetrieveDocs, UserInfo, dir_path, file_info.id, input])
-
-
-	const openFile=useCallback((value:generalDir,toDownload:boolean)=>{
-
-		getBlob(ref(fireStorage,value.access_id!+"."+value.extension!)).then((blob)=>{
-			const a=document.createElement("a");
-			a.href=URL.createObjectURL(blob);
-			a.target="_blank"
-			if(toDownload){
-				a.download=value.name;
+		getDoc(oldRef).then((doc)=>{
+			if(doc.exists()){
+				updateDoc(oldRef, {
+					name: inputRename
+				}).then(()=> {
+					console.log("renamed successfully")
+					const index=Files.indexOf(file_info);
+					if(index!=-1){
+						const temp=Array.from(Files);
+						temp.splice(index,1);
+						const newvalues=file_info;
+						newvalues.name=inputRename;
+						temp.splice(index,0,newvalues);
+						setFiles(temp);
+						setInputRename("");
+					}
+				});
 			}
-			a.click();
 		})
 
-	},[])
+	},[Files, UserInfo, dir_path, file_info, inputRename, setFiles])
 
-	const RenamePromtTrigger=useRef<HTMLButtonElement>(null)
-	const SharePromtTrigger=useRef<HTMLButtonElement>(null);
-	const deleteFileFunc=useCallback(async ()=>{
+
+	const openFile=useCallback((file_info:generalDir,toDownload:boolean)=>{
+		if(toDownload && downloadInputUrl){
+			const a=document.createElement("a");
+			a.href=downloadInputUrl;
+			a.download=file_info.name;
+			a.click();
+			return;
+		}
+		if(!toDownload){
+			promtdownloadedfile.current!.click();
+		}
+		if(downloadInputUrl){
+			return;
+		}
+		fetch(`${import.meta.env.VITE_BACKEND}/${file_info.access_id}.${file_info.extension}`)
+			.then(response => {
+
+				let receivedLength = 0;
+				const reader = response.body!.getReader();
+				return new ReadableStream({
+					start(controller) {
+						async function pump() {
+							return reader.read().then(({ done, value }) => {
+								if (done) {
+									controller.close();
+									return;
+								}
+								receivedLength += value.length;
+								// Update the progress bar
+								const progress = (receivedLength / file_info.size!) * 100;
+								// console.log(progress)
+								setDownloadProgress(progress);
+								// Process the chunk (value) as needed
+								// Enqueue the next chunk
+								controller.enqueue(value);
+								// Continue with the next data chunk
+								pump();
+							});
+						}
+						return pump();
+					}
+				});
+			}).then(stream => new Response(stream))
+			.then(response => response.blob())
+			.then(blob => {
+				if(toDownload){
+					const a=document.createElement("a");
+					const newBlob=new Blob([blob],{type:file_info.type});
+					const url=URL.createObjectURL(newBlob);
+					setDownloadInputUrl(url);
+					a.href=url;
+					a.download=file_info.name;
+					a.click();
+					console.log('Download complete!');
+				}
+				else{
+					const newBlob=new Blob([blob],{type:file_info.type});
+					const url=URL.createObjectURL(newBlob);
+					setDownloadInputUrl(url);
+				}
+			}).catch(error => {
+				console.error('Error downloading file:', error);
+			});
+
+
+	},[downloadInputUrl])
+
+	const deleteFileFunc=useCallback( ()=>{
 		const arr=dir_path!.split("/")!;
 		const {email}:User=JSON.parse(UserInfo)
 		let currpath=email!;
@@ -68,16 +140,30 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 				currpath+="/folders";
 			}
 		})
+
 		//delete from files database
-		await deleteDoc(doc(database,currpath+"/files",file_info.id!))
+		deleteDoc(doc(database,currpath+"/files",file_info.id!)).catch(()=>{
+			console.log("error in deleting from files database");
+		})
 		//delete from access_db
-		await deleteDoc(doc(database,"access_files_db",file_info.access_id!))
+		deleteDoc(doc(database,"access_files_db",file_info.access_id!)).catch(()=>{
+			console.log("error in deleting from filesaccess database");
+		})
+
 		//delete from storage
 		const deleteRef=ref(fireStorage,file_info.access_id+"."+file_info.extension);
-		await deleteObject(deleteRef)
-		RetrieveDocs();
+		deleteObject(deleteRef).catch(()=>{
+			console.log("error in deleting from storage");
+		})
+		const index=Files.indexOf(file_info);
+		if(index!=-1){
+			const temp=Array.from(Files);
+			temp.splice(index,1);
+			setFiles(temp);
+		}
 
-	},[RetrieveDocs, UserInfo, dir_path, file_info.access_id, file_info.extension, file_info.id])
+
+	},[Files, UserInfo, dir_path, file_info, setFiles])
 	const copyLinkFunc=useCallback(()=>{
 		navigator.clipboard.writeText(import.meta.env.VITE_WEBSITE+"/access/"+file_info.access_id).then(()=>{
 			console.log("copied successfully");
@@ -85,7 +171,6 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 			alert("copy fails");
 		})
 	},[file_info.access_id])
-	const [AlreadyAllowedUsers,SetAllowedUsers]=useState(new Array<string>());
 	const fetchAllowedUsers=useCallback(()=>{
 		const tempRef=doc(database,"access_files_db",file_info.access_id!);
 		getDoc(tempRef).then((docSnap)=>{
@@ -95,7 +180,6 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 			}
 		})
 	},[file_info.access_id])
-	const [addUserEmail,setAddUserEmail]=useState("");
 	const allowUserFileFunc=useCallback(()=>{
 		setAddUserEmail("");
 		const {email}:User=JSON.parse(UserInfo)
@@ -112,10 +196,9 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 						updateDoc(tempRef, {
 							allowed_users: ["*"]
 						}).then(()=>{
-							fetchAllowedUsers();
+							SetAllowedUsers(["*"]);
 							console.log("access allowed to this user")
 						}).catch(()=>{
-
 							console.log("error in providing access");
 						})
 					}
@@ -130,7 +213,7 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 								allowed_users: newArray
 							}).then(()=>{
 
-								fetchAllowedUsers();
+								SetAllowedUsers(newArray);
 								console.log("access allowed to this user")
 							}).catch(()=>{
 
@@ -149,7 +232,7 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 		}
 
 
-	},[UserInfo, addUserEmail, fetchAllowedUsers, file_info.access_id])
+	},[UserInfo, addUserEmail, file_info.access_id])
 
 	const RevokeAccessUser=useCallback((tempEmail:string)=>{
 		const tempRef=doc(database,"access_files_db",file_info.access_id!);
@@ -159,20 +242,18 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 				const index = arr.indexOf(tempEmail);
 				if (index !== -1) {
 					arr.splice(index, 1);
+					updateDoc(tempRef,{
+						allowed_users:arr
+					}).then(()=>{
+						SetAllowedUsers(arr);
+						console.log("access removed");
+					}).catch(()=>{
+						console.log("error in removing access");
+					})
 				}
-				updateDoc(tempRef,{
-					allowed_users:arr
-				}).then(()=>{
-					fetchAllowedUsers();
-					console.log("access removed");
-				}).catch(()=>{
-					console.log("error in removing access");
-				})
-				
-
 			}
 		})
-	},[fetchAllowedUsers, file_info.access_id])
+	},[file_info.access_id])
 	return <ContextMenu.Root>
 		<ContextMenu.Trigger >
 			<div>
@@ -236,12 +317,12 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 										</DropdownMenu.Item>
 									</DropdownMenu.SubContent>
 								</DropdownMenu.Sub>
-								<DropdownMenu.Item >
-									<Flex gap={"3"} align={"center"}>
-										<IoMdInformationCircleOutline/>
-										File Info
-									</Flex>
-									</DropdownMenu.Item>
+								{/*<DropdownMenu.Item >*/}
+								{/*	<Flex gap={"3"} align={"center"}>*/}
+								{/*		<IoMdInformationCircleOutline/>*/}
+								{/*		File Info*/}
+								{/*	</Flex>*/}
+								{/*</DropdownMenu.Item>*/}
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item  color="red" onClick={deleteFileFunc}>
 									<Flex gap={"3"} align={"center"}>
@@ -254,12 +335,26 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 					</div>
 				</div>
 				<Dialog.Root>
+					<Dialog.Trigger>
+						<button hidden={true} ref={promtdownloadedfile}></button>
+					</Dialog.Trigger>
+					<Dialog.Content style={{ minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
+						<Flex justify={"between"}>
+							<Text style={{fontWeight:"bolder"}}>{file_info.name}</Text>
+							<Button style={{visibility:(downloadInputUrl?"visible":"hidden")}} onClick={()=>openFile(file_info,true)}>Download</Button>
+						</Flex>
+						<progress value={DownloadProgress}  max={100} style={{width:"100%"}}>{DownloadProgress}</progress>
+						<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"} style={{objectFit:"contain"}} >
+						</object>
+					</Dialog.Content>
+				</Dialog.Root>
+				<Dialog.Root>
 					<Dialog.Trigger  >
 						<button ref={RenamePromtTrigger} hidden={true}></button>
 					</Dialog.Trigger>
 					<Dialog.Content style={{ maxWidth: 450 }}>
 						<Dialog.Title>Rename</Dialog.Title>
-						<TextField.Input placeholder="..." value={input} onChange={(e)=>setInput(e.currentTarget.value)}/>
+						<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
 						<Flex gap="3" mt="4" justify="end">
 							<Dialog.Close>
 								<Button variant="soft" color="gray">
@@ -278,7 +373,7 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 					</Dialog.Trigger>
 
 					<Dialog.Content onOpenAutoFocus={(e)=>e.preventDefault()} style={{ maxWidth: 450 }}>
-						<Dialog.Title>Share {file_info.name}</Dialog.Title>
+						<Dialog.Title  style={{fontWeight:"normal"}}>Share <i>{file_info.name}</i></Dialog.Title>
 						<TextField.Root>
 							<TextField.Input placeholder="Add user email" size="2" value={addUserEmail} onChange={(e)=>setAddUserEmail(e.currentTarget.value)}/>
 							<TextField.Slot style={{visibility:(addUserEmail!=""?"visible":"hidden")}} onClick={allowUserFileFunc}>
@@ -385,12 +480,12 @@ export const FileDocs=memo(({file_info,RetrieveDocs}:{file_info:generalDir,Retri
 			</ContextMenu.Sub>
 
 
-			<ContextMenu.Item>
-				<Flex gap={"3"} align={"center"}>
-					<IoMdInformationCircleOutline/>
-					File Info
-				</Flex>
-				</ContextMenu.Item>
+			{/*<ContextMenu.Item>*/}
+			{/*	<Flex gap={"3"} align={"center"}>*/}
+			{/*		<IoMdInformationCircleOutline/>*/}
+			{/*		File Info*/}
+			{/*	</Flex>*/}
+			{/*</ContextMenu.Item>*/}
 			<ContextMenu.Separator />
 			<ContextMenu.Item  color="red"  onClick={deleteFileFunc}>
 				<Flex gap={"3"} align={"center"}>

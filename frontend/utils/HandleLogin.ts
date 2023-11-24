@@ -6,7 +6,9 @@ export const HandleLogin=async () =>{
 		const provider= new GoogleAuthProvider();
 		const {user}= await signInWithPopup(firebaseAuth,provider);
 		if(user.email  && user.emailVerified){
-			return user;
+			return new Promise((resolve)=>{
+				resolve(user);
+			})
 		}
 		else{
 			return new Promise((_res, reject)=>{

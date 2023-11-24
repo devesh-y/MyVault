@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a feature-rich cloud storage platform developed using React and Firebase, offering a comprehensive cloud storage solution with advanced functionalities. Users can upload and download files, create folders, and seamlessly manage their data in a collaborative environment.
+This project is a feature-rich cloud storage platform developed using React, Express and Firebase, offering a comprehensive cloud storage solution with advanced functionalities. Users can upload and download files, create folders, and seamlessly manage their data in a collaborative environment.
 
 ## Features
 
@@ -30,4 +30,4 @@ This project is a feature-rich cloud storage platform developed using React and 
     - Radix UI library for modern and responsive components.
 
 - **Backend:**
-    - Firebase for cloud storage and authentication.
+    - Firebase for cloud storage and authentication, Express for optimized file downloading from cloud storage.

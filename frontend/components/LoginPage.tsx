@@ -2,7 +2,7 @@ import "./LoginPage.css"
 import {FcGoogle} from "react-icons/fc"
 import {HandleLogin} from "../utils/HandleLogin.ts";
 import {NavigateFunction, useNavigate} from "react-router-dom";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {SetCookie} from "../utils/get_set_cookies.ts";
 import {GetCookie} from "../utils/get_set_cookies.ts";
 import {useDispatch} from "react-redux";
@@ -26,22 +26,31 @@ function SignIn(navigate:NavigateFunction,dispatch:Dispatch){
 export const LoginPage=()=>{
 	const dispatch=useDispatch();
 	const navigate =useNavigate();
+	const [showLoginpage,setLoginpage]=useState(false);
 	useEffect(()=>{
 		const response=GetCookie();
 		if(response){
 			dispatch(setUserInfo(response));
 			navigate("/root", { replace: true });
 		}
+		else{
+			setLoginpage(true);
+		}
 
 	},[dispatch, navigate])
 
 	return <div id={"loginpage"}>
-		<div id={"loginpage-heading"}>
-			MyVault
-		</div>
-		<div id={"loginpage-btn"} onClick={()=>SignIn(navigate,dispatch)}>
-			<FcGoogle size={30}/>
-			<p>Login With Google</p>
-		</div>
+		{showLoginpage?
+		<>
+			<div id={"loginpage-heading"}>
+				MyVault
+			</div>
+			<div id={"loginpage-btn"} onClick={()=>SignIn(navigate,dispatch)}>
+				<FcGoogle size={30}/>
+				<p>Login With Google</p>
+			</div>
+		</>:<></>
+		}
+
 	</div>
 }

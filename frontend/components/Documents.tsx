@@ -17,6 +17,7 @@ export type generalDir ={
 	name:string,
 	timestamp?:Date,
 	id:string,
+	type?:string,
 	access_id?:string,
 	extension?:string
 	size?:number
@@ -53,7 +54,7 @@ export const Documents=()=>{
 			})
 			getDocs(collection(database,finalpath+"/files")).then((response)=>{
 				response.forEach((doc)=>{
-					tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size})
+					tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
 				})
 				setFiles(tempfiles);
 			})
@@ -113,9 +114,9 @@ export const Documents=()=>{
 					await uploadBytes(storeRef,file);
 					console.log("uploaded")
 
-					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,access_id:uniqueId,extension:fileExt,size:file.size});
-					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,allowed_users:[],extension:fileExt,size:file.size})
-					tempFiles.push({name:filename,id:CurrDateTime,access_id:uniqueId,extension:fileExt,size:file.size});
+					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,access_id:uniqueId,extension:fileExt,size:file.size,type:file.type});
+					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,allowed_users:[],extension:fileExt,size:file.size,type:file.type,name:filename})
+					tempFiles.push({name:filename,id:CurrDateTime,access_id:uniqueId,extension:fileExt,size:file.size,type:file.type});
 				}
 				catch(err){
 					return new Promise((_resolve,reject)=>{
@@ -210,7 +211,7 @@ export const Documents=()=>{
 		<div id={"documents-folders"}>
 			{
 				Folders.map((value,index)=>{
-					return <FolderDocs key={index+(dir_path?dir_path:"")} folder_info={value} RetrieveDocs={RetrieveDocs}/>
+					return <FolderDocs key={index+(dir_path?dir_path:"")} folder_info={value} setFolders={setFolders} Folders={Folders}/>
 				})
 			}
 		</div>
@@ -218,7 +219,7 @@ export const Documents=()=>{
 		<div id={"documents-files"}>
 			{
 				Files.map((value,index)=>{
-					return <FileDocs key={index+(dir_path?dir_path:"")} file_info={value} RetrieveDocs={RetrieveDocs} />
+					return <FileDocs key={index+(dir_path?dir_path:"")} Files={Files} setFiles={setFiles}  file_info={value} />
 				})
 			}
 		</div>
