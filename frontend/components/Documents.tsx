@@ -9,7 +9,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {setUserInfo} from "../ReduxStore/slice.ts";
 import {StoreType} from "../ReduxStore/store.ts";
 import {SHA256} from "crypto-js";
-import {ref, uploadBytes} from "firebase/storage";
+import {ref, uploadBytesResumable} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
 import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
@@ -111,12 +111,30 @@ export const Documents=()=>{
 				const storeRef=ref(fireStorage,filePath);
 				try
 				{
-					await uploadBytes(storeRef,file);
+					const myfileupload=async ()=>{
+						return new Promise((resolve, reject)=>{
+							const uploadtask=uploadBytesResumable(storeRef,file);
+							uploadtask.on('state_changed',
+								(snapshot) => {
+									const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+									console.log('Upload is ' + progress + '% done');
+									if(progress==100){
+										resolve("done");
+									}
+								}, (error) => {
+									reject(error);
+								}
+							);
+						})
+					}
+					await myfileupload();
+
 					console.log("uploaded")
 
 					await setDoc(doc(database,finalpath+"/files",CurrDateTime),{name:filename,access_id:uniqueId,extension:fileExt,size:file.size,type:file.type});
 					await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,allowed_users:[],extension:fileExt,size:file.size,type:file.type,name:filename})
 					tempFiles.push({name:filename,id:CurrDateTime,access_id:uniqueId,extension:fileExt,size:file.size,type:file.type});
+					setFiles([...Files,...tempFiles]);
 				}
 				catch(err){
 					return new Promise((_resolve,reject)=>{
@@ -125,7 +143,6 @@ export const Documents=()=>{
 
 				}
 			}
-			setFiles([...Files,...tempFiles]);
 			return new Promise((resolve)=>{
 				resolve("all files uploaded")
 			})
@@ -206,7 +223,9 @@ export const Documents=()=>{
 		</Flex>
 
 		<input type={"file"} ref={myFileInput} hidden onChange={upload_files} multiple/>
+		{/*<div id={"fileUploadProgressdiv"} style={{position:"absolute"}}>*/}
 
+		{/*</div>*/}
 		{Folders.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Folders</p>:<></>}
 		<div id={"documents-folders"}>
 			{
