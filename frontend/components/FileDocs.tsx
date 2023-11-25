@@ -338,10 +338,18 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 					<Dialog.Trigger>
 						<button hidden={true} ref={promtdownloadedfile}></button>
 					</Dialog.Trigger>
-					<Dialog.Content style={{ minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
-						<Flex justify={"between"}>
+					<Dialog.Content style={{zIndex:"100", minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
+						<Flex justify={"between"} align={"center"}>
 							<Text style={{fontWeight:"bolder"}}>{file_info.name}</Text>
-							<Button style={{visibility:(downloadInputUrl?"visible":"hidden")}} onClick={()=>openFile(file_info,true)}>Download</Button>
+							<Flex gap={"2"}>
+								<Button disabled={downloadInputUrl==undefined} onClick={()=>openFile(file_info,true)}>Download</Button>
+								<Dialog.Close>
+									<Button color="crimson" variant="soft">
+										Close
+									</Button>
+								</Dialog.Close>
+
+							</Flex>
 						</Flex>
 						<progress value={DownloadProgress}  max={100} style={{width:"100%"}}>{DownloadProgress}</progress>
 						<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"} style={{objectFit:"contain"}} >

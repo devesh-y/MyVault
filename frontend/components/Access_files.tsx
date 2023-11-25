@@ -103,7 +103,7 @@ export const Access_files=()=>{
 			<Dialog.Content style={{ minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
 				<Flex justify={"between"}>
 					<Text style={{fontWeight:"bolder"}}>{file_info.name}</Text>
-					<Button style={{visibility:(downloadInputUrl?"visible":"hidden")}} onClick={()=>{
+					<Button disabled={downloadInputUrl==undefined} onClick={()=>{
 						const a=document.createElement("a");
 						a.href=downloadInputUrl!;
 						a.download=file_info.name;
