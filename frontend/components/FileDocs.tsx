@@ -339,8 +339,8 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 						<button hidden={true} ref={promtdownloadedfile}></button>
 					</Dialog.Trigger>
 					<Dialog.Content style={{zIndex:"100", minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
-						<Flex justify={"between"} align={"center"}>
-							<Text style={{fontWeight:"bolder"}}>{file_info.name}</Text>
+						<Flex justify={"between"} align={"center"} width={"100%"}>
+							<Text style={{fontWeight:"bolder",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</Text>
 							<Flex gap={"2"}>
 								<Button disabled={downloadInputUrl==undefined} onClick={()=>openFile(file_info,true)}>Download</Button>
 								<Dialog.Close>

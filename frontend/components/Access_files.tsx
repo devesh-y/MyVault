@@ -101,8 +101,8 @@ export const Access_files=()=>{
 				<button hidden={true} ref={promtdownloadedfile}></button>
 			</Dialog.Trigger>
 			<Dialog.Content style={{ minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
-				<Flex justify={"between"}>
-					<Text style={{fontWeight:"bolder"}}>{file_info.name}</Text>
+				<Flex justify={"between"} align={"center"} width={"100%"}>
+					<Text style={{fontWeight:"bolder",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</Text>
 					<Button disabled={downloadInputUrl==undefined} onClick={()=>{
 						const a=document.createElement("a");
 						a.href=downloadInputUrl!;
