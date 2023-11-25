@@ -82,9 +82,29 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 		})
 
 	},[Folders, UserInfo, dir_path, folder_info, setFolders])
-	return <ContextMenu.Root>
+	return <>
+		<Dialog.Root>
+			<Dialog.Trigger  >
+				<button ref={PromtTrigger} hidden={true}></button>
+			</Dialog.Trigger>
+			<Dialog.Content style={{ maxWidth: 450 }}>
+				<Dialog.Title>Rename</Dialog.Title>
+				<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
+				<Flex gap="3" mt="4" justify="end">
+					<Dialog.Close>
+						<Button variant="soft" color="gray">
+							Cancel
+						</Button>
+					</Dialog.Close>
+					<Dialog.Close>
+						<Button onClick={rename_folder_func}>Save</Button>
+					</Dialog.Close>
+				</Flex>
+			</Dialog.Content>
+		</Dialog.Root>
+	<ContextMenu.Root>
 		<ContextMenu.Trigger >
-			<div>
+
 				<div title={folder_info.name}  onDoubleClick={()=>openFolder(folder_info)} style={
 					{
 						width:"fit-content",
@@ -129,26 +149,8 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 						</DropdownMenu.Root>
 					</div>
 				</div>
-				<Dialog.Root>
-					<Dialog.Trigger  >
-						<button ref={PromtTrigger} hidden={true}></button>
-					</Dialog.Trigger>
-					<Dialog.Content style={{ maxWidth: 450 }}>
-						<Dialog.Title>Rename</Dialog.Title>
-						<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
-						<Flex gap="3" mt="4" justify="end">
-							<Dialog.Close>
-								<Button variant="soft" color="gray">
-									Cancel
-								</Button>
-							</Dialog.Close>
-							<Dialog.Close>
-								<Button onClick={rename_folder_func}>Save</Button>
-							</Dialog.Close>
-						</Flex>
-					</Dialog.Content>
-				</Dialog.Root>
-			</div>
+
+
 
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
@@ -173,5 +175,6 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 			</ContextMenu.Item>
 		</ContextMenu.Content>
 	</ContextMenu.Root>
+	</>
 })
 

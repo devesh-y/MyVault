@@ -254,9 +254,117 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 			}
 		})
 	},[file_info.access_id])
-	return <ContextMenu.Root>
-		<ContextMenu.Trigger >
-			<div>
+	return <>
+		<Dialog.Root>
+			<Dialog.Trigger>
+				<button hidden={true} ref={promtdownloadedfile}></button>
+			</Dialog.Trigger>
+			<Dialog.Content style={{minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
+				<Flex justify={"between"} align={"center"} width={"100%"}>
+					<Text style={{fontWeight:"bolder",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</Text>
+					<Flex gap={"2"}>
+						<Button disabled={downloadInputUrl==undefined} onClick={()=>openFile(file_info,true)}>Download</Button>
+						<Dialog.Close>
+							<Button color="crimson" variant="soft">
+								Close
+							</Button>
+						</Dialog.Close>
+
+					</Flex>
+				</Flex>
+				<progress value={DownloadProgress}  max={100} style={{width:"100%"}}>{DownloadProgress}</progress>
+				<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"} style={{objectFit:"contain"}} >
+				</object>
+			</Dialog.Content>
+		</Dialog.Root>
+		<Dialog.Root>
+			<Dialog.Trigger  >
+				<button ref={RenamePromtTrigger} hidden={true}></button>
+			</Dialog.Trigger>
+			<Dialog.Content style={{ maxWidth: 450 }}>
+				<Dialog.Title>Rename</Dialog.Title>
+				<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
+				<Flex gap="3" mt="4" justify="end">
+					<Dialog.Close>
+						<Button variant="soft" color="gray">
+							Cancel
+						</Button>
+					</Dialog.Close>
+					<Dialog.Close>
+						<Button onClick={rename_file_func}>Save</Button>
+					</Dialog.Close>
+				</Flex>
+			</Dialog.Content>
+		</Dialog.Root>
+		<Dialog.Root>
+			<Dialog.Trigger>
+				<button hidden={true} ref={SharePromtTrigger}></button>
+			</Dialog.Trigger>
+
+			<Dialog.Content onOpenAutoFocus={(e)=>e.preventDefault()} style={{ maxWidth: 450 }}>
+				<Dialog.Title  style={{fontWeight:"normal"}}>Share <i>{file_info.name}</i></Dialog.Title>
+				<TextField.Root>
+					<TextField.Input placeholder="Add user email" size="2" value={addUserEmail} onChange={(e)=>setAddUserEmail(e.currentTarget.value)}/>
+					<TextField.Slot style={{visibility:(addUserEmail!=""?"visible":"hidden")}} onClick={allowUserFileFunc}>
+						<IconButton size="1" >
+							<IoAdd size={"20"}/>
+						</IconButton>
+					</TextField.Slot>
+
+				</TextField.Root>
+				<Text as="div" size="2" mb="1" mt={"2"} weight="medium">People with access</Text>
+				<ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: 100 }}  >
+					{AlreadyAllowedUsers.length==0?<Text size={"2"}>None</Text>:<></>}
+					{AlreadyAllowedUsers.map((email,index)=>{
+						return <Flex key={index+(file_info.access_id?file_info.access_id:"")} align={"center"} justify={"between"} pr={"2"} mb={"2"}>
+							<Text size={"2"}>{email=="*"?"Everyone":email}</Text>
+							<Button color="crimson" variant="soft" onClick={()=>RevokeAccessUser(email)}>Revoke</Button>
+						</Flex>
+					})}
+
+				</ScrollArea>
+				<Text as="div" size="2" mb="1" mt={"2"} weight="medium">General access</Text>
+				<Flex align={"center"} gap={"2"}  >
+					<Button onClick={allowUserFileFunc} >Allow everyone </Button>
+					<Flex gap={"1"} align={"center"} >
+						<IoMdInformationCircleOutline />
+						<Text size={"2"}>Anyone can read this file</Text>
+
+					</Flex>
+
+				</Flex>
+
+
+
+				<Flex gap="3" mt="4" justify={"between"} >
+					<div>
+						<Button color={"teal"}>
+							<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
+								<IoCopyOutline/>
+								Copy link
+							</Flex>
+						</Button>
+					</div>
+
+					<div>
+						<Flex gap="3" justify="end">
+							<Dialog.Close>
+								<Button variant="soft" color="gray">
+									Cancel
+								</Button>
+							</Dialog.Close>
+							<Dialog.Close>
+								<Button>Done</Button>
+							</Dialog.Close>
+						</Flex>
+
+					</div>
+
+				</Flex>
+			</Dialog.Content>
+		</Dialog.Root>
+		<ContextMenu.Root>
+			<ContextMenu.Trigger >
 				<div title={file_info.name}  onDoubleClick={()=>openFile(file_info,false)} style={
 					{
 						width:"fit-content",
@@ -334,173 +442,65 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 						</DropdownMenu.Root>
 					</div>
 				</div>
-				<Dialog.Root>
-					<Dialog.Trigger>
-						<button hidden={true} ref={promtdownloadedfile}></button>
-					</Dialog.Trigger>
-					<Dialog.Content style={{zIndex:"100", minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
-						<Flex justify={"between"} align={"center"} width={"100%"}>
-							<Text style={{fontWeight:"bolder",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</Text>
-							<Flex gap={"2"}>
-								<Button disabled={downloadInputUrl==undefined} onClick={()=>openFile(file_info,true)}>Download</Button>
-								<Dialog.Close>
-									<Button color="crimson" variant="soft">
-										Close
-									</Button>
-								</Dialog.Close>
 
-							</Flex>
-						</Flex>
-						<progress value={DownloadProgress}  max={100} style={{width:"100%"}}>{DownloadProgress}</progress>
-						<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"} style={{objectFit:"contain"}} >
-						</object>
-					</Dialog.Content>
-				</Dialog.Root>
-				<Dialog.Root>
-					<Dialog.Trigger  >
-						<button ref={RenamePromtTrigger} hidden={true}></button>
-					</Dialog.Trigger>
-					<Dialog.Content style={{ maxWidth: 450 }}>
-						<Dialog.Title>Rename</Dialog.Title>
-						<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
-						<Flex gap="3" mt="4" justify="end">
-							<Dialog.Close>
-								<Button variant="soft" color="gray">
-									Cancel
-								</Button>
-							</Dialog.Close>
-							<Dialog.Close>
-								<Button onClick={rename_file_func}>Save</Button>
-							</Dialog.Close>
-						</Flex>
-					</Dialog.Content>
-				</Dialog.Root>
-				<Dialog.Root>
-					<Dialog.Trigger>
-						<button hidden={true} ref={SharePromtTrigger}></button>
-					</Dialog.Trigger>
-
-					<Dialog.Content onOpenAutoFocus={(e)=>e.preventDefault()} style={{ maxWidth: 450 }}>
-						<Dialog.Title  style={{fontWeight:"normal"}}>Share <i>{file_info.name}</i></Dialog.Title>
-						<TextField.Root>
-							<TextField.Input placeholder="Add user email" size="2" value={addUserEmail} onChange={(e)=>setAddUserEmail(e.currentTarget.value)}/>
-							<TextField.Slot style={{visibility:(addUserEmail!=""?"visible":"hidden")}} onClick={allowUserFileFunc}>
-								<IconButton size="1" >
-									<IoAdd size={"20"}/>
-								</IconButton>
-							</TextField.Slot>
-
-						</TextField.Root>
-						<Text as="div" size="2" mb="1" mt={"2"} weight="medium">People with access</Text>
-						<ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: 100 }}  >
-							{AlreadyAllowedUsers.length==0?<Text size={"2"}>None</Text>:<></>}
-							{AlreadyAllowedUsers.map((email,index)=>{
-								return <Flex key={index+(file_info.access_id?file_info.access_id:"")} align={"center"} justify={"between"} pr={"2"} mb={"2"}>
-									<Text size={"2"}>{email=="*"?"Everyone":email}</Text>
-									<Button color="crimson" variant="soft" onClick={()=>RevokeAccessUser(email)}>Revoke</Button>
-								</Flex>
-							})}
-
-						</ScrollArea>
-						<Text as="div" size="2" mb="1" mt={"2"} weight="medium">General access</Text>
-						<Flex align={"center"} gap={"2"}  >
-							<Button onClick={allowUserFileFunc} >Allow everyone </Button>
-							<Flex gap={"1"} align={"center"} >
-									<IoMdInformationCircleOutline />
-								<Text size={"2"}>Anyone can read this file</Text>
-
-							</Flex>
-
-						</Flex>
-
-
-
-						<Flex gap="3" mt="4" justify={"between"} >
-							<div>
-								<Button color={"teal"}>
-									<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
-										<IoCopyOutline/>
-										Copy link
-									</Flex>
-								</Button>
-							</div>
-
-							<div>
-								<Flex gap="3" justify="end">
-									<Dialog.Close>
-										<Button variant="soft" color="gray">
-											Cancel
-										</Button>
-									</Dialog.Close>
-									<Dialog.Close>
-										<Button>Done</Button>
-									</Dialog.Close>
-								</Flex>
-
-							</div>
-
-						</Flex>
-					</Dialog.Content>
-				</Dialog.Root>
-			</div>
-
-		</ContextMenu.Trigger>
-		<ContextMenu.Content>
-			<ContextMenu.Item onClick={()=>RenamePromtTrigger.current!.click()} >
-				<Flex gap={"3"} align={"center"}>
-					<MdOutlineDriveFileRenameOutline/>
-					Rename
-				</Flex>
-			</ContextMenu.Item>
-			<ContextMenu.Item onClick={()=>openFile(file_info,true)} >
-				<Flex gap={"3"} align={"center"}>
-					<GoDownload/>
-					Download
-				</Flex>
-				</ContextMenu.Item>
-			<ContextMenu.Separator />
-
-			<ContextMenu.Sub>
-				<ContextMenu.SubTrigger>
+			</ContextMenu.Trigger>
+			<ContextMenu.Content>
+				<ContextMenu.Item onClick={()=>RenamePromtTrigger.current!.click()} >
 					<Flex gap={"3"} align={"center"}>
-						<MdOutlineShare/>
-						Share
+						<MdOutlineDriveFileRenameOutline/>
+						Rename
 					</Flex>
-				</ContextMenu.SubTrigger>
-				<ContextMenu.SubContent>
-					<ContextMenu.Item onClick={()=> {
-						SharePromtTrigger.current!.click();
-						fetchAllowedUsers();
-					}}>
+				</ContextMenu.Item>
+				<ContextMenu.Item onClick={()=>openFile(file_info,true)} >
+					<Flex gap={"3"} align={"center"}>
+						<GoDownload/>
+						Download
+					</Flex>
+					</ContextMenu.Item>
+				<ContextMenu.Separator />
+
+				<ContextMenu.Sub>
+					<ContextMenu.SubTrigger>
 						<Flex gap={"3"} align={"center"}>
 							<MdOutlineShare/>
 							Share
 						</Flex>
-					</ContextMenu.Item>
-					<ContextMenu.Item>
-						<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
-							<IoCopyOutline/>
-							Copy link
-						</Flex>
+					</ContextMenu.SubTrigger>
+					<ContextMenu.SubContent>
+						<ContextMenu.Item onClick={()=> {
+							SharePromtTrigger.current!.click();
+							fetchAllowedUsers();
+						}}>
+							<Flex gap={"3"} align={"center"}>
+								<MdOutlineShare/>
+								Share
+							</Flex>
+						</ContextMenu.Item>
+						<ContextMenu.Item>
+							<Flex gap={"3"} align={"center"} onClick={copyLinkFunc}>
+								<IoCopyOutline/>
+								Copy link
+							</Flex>
 
-					</ContextMenu.Item>
-				</ContextMenu.SubContent>
-			</ContextMenu.Sub>
+						</ContextMenu.Item>
+					</ContextMenu.SubContent>
+				</ContextMenu.Sub>
 
 
-			{/*<ContextMenu.Item>*/}
-			{/*	<Flex gap={"3"} align={"center"}>*/}
-			{/*		<IoMdInformationCircleOutline/>*/}
-			{/*		File Info*/}
-			{/*	</Flex>*/}
-			{/*</ContextMenu.Item>*/}
-			<ContextMenu.Separator />
-			<ContextMenu.Item  color="red"  onClick={deleteFileFunc}>
-				<Flex gap={"3"} align={"center"}>
-					<RiDeleteBin6Line/>
-					Delete
-				</Flex>
-			</ContextMenu.Item>
-		</ContextMenu.Content>
-	</ContextMenu.Root>
+				{/*<ContextMenu.Item>*/}
+				{/*	<Flex gap={"3"} align={"center"}>*/}
+				{/*		<IoMdInformationCircleOutline/>*/}
+				{/*		File Info*/}
+				{/*	</Flex>*/}
+				{/*</ContextMenu.Item>*/}
+				<ContextMenu.Separator />
+				<ContextMenu.Item  color="red"  onClick={deleteFileFunc}>
+					<Flex gap={"3"} align={"center"}>
+						<RiDeleteBin6Line/>
+						Delete
+					</Flex>
+				</ContextMenu.Item>
+			</ContextMenu.Content>
+		</ContextMenu.Root>
+	</>
 })
