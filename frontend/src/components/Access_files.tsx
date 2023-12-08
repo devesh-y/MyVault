@@ -123,7 +123,7 @@ export const Access_files=()=>{
 		}}>
 			<h1 style={{
 				fontSize: '3em',
-				color: '#ff6347', // Tomato color
+				color: '#ff6347',
 				marginBottom: '10px',
 			}}>403 - Forbidden</h1>
 			<p style={ {
