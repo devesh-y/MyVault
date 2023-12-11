@@ -100,7 +100,7 @@ export const Access_files=()=>{
 			<Dialog.Trigger>
 				<button hidden={true} ref={promtdownloadedfile}></button>
 			</Dialog.Trigger>
-			<Dialog.Content style={{ minWidth:"90vw",minHeight:"90vh",overflow:"hidden",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
+			<Dialog.Content style={{minWidth:"90vw",minHeight:"90vh",width:"90vw",height:"90vh",display:"flex",flexDirection:"column"}}>
 				<Flex justify={"between"} align={"center"} width={"100%"}>
 					<Text style={{fontWeight:"bolder",textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</Text>
 					<Button disabled={downloadInputUrl==undefined} onClick={()=>{
@@ -110,12 +110,17 @@ export const Access_files=()=>{
 						a.click();
 					}}>Download</Button>
 				</Flex>
-				<progress value={DownloadProgress}  max={100} style={{width:"100%"}} >{DownloadProgress}</progress>
-				<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"} style={{objectFit:"contain"}} >
-				</object>
+				<div>
+					<progress value={DownloadProgress} max={100} style={{width: "100%"}}>{DownloadProgress}</progress>
+				</div>
+				<div style={{flex: "1 1 auto", display: "flex", justifyContent: "center", overflow: "hidden"}}>
+					<object type={`${file_info.type}`} data={downloadInputUrl} height={"100%"} width={"100%"}
+							style={{objectFit: 'contain'}}>
+					</object>
+				</div>
 			</Dialog.Content>
 		</Dialog.Root>
-		{denied_access?<div style={{
+		{denied_access ? <div style={{
 			fontFamily: 'Roboto, sans-serif',
 			textAlign: 'center',
 			margin: '50px',
