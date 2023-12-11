@@ -283,7 +283,7 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 			</Dialog.Trigger>
 			<Dialog.Content style={{ maxWidth: 450 }}>
 				<Dialog.Title>Rename</Dialog.Title>
-				<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
+				<TextField.Input placeholder={file_info.name} value={inputRename}  onChange={(e)=>setInputRename(e.currentTarget.value)}/>
 				<Flex gap="3" mt="4" justify="end">
 					<Dialog.Close>
 						<Button variant="soft" color="gray">

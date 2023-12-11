@@ -59,7 +59,7 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 		finalpath=encodeURIComponent(finalpath);
 		navigate("/"+finalpath);
 	},[dir_path, navigate])
-	const PromtTrigger=useRef<HTMLButtonElement>(null)
+	const PromtRenameTrigger=useRef<HTMLButtonElement>(null)
 	const deleteFolderFunc=useCallback(()=>{
 		const arr=dir_path!.split("/")!;
 		const {email}:User=JSON.parse(UserInfo)
@@ -87,11 +87,11 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 	return <>
 		<Dialog.Root>
 			<Dialog.Trigger  >
-				<button ref={PromtTrigger} hidden={true}></button>
+				<button ref={PromtRenameTrigger} hidden={true}></button>
 			</Dialog.Trigger>
 			<Dialog.Content style={{ maxWidth: 450 }}>
 				<Dialog.Title>Rename</Dialog.Title>
-				<TextField.Input placeholder="..." value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
+				<TextField.Input placeholder={folder_info.name} value={inputRename} onChange={(e)=>setInputRename(e.currentTarget.value)}/>
 				<Flex gap="3" mt="4" justify="end">
 					<Dialog.Close>
 						<Button variant="soft" color="gray">
@@ -135,7 +135,7 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content>
-									<DropdownMenu.Item onClick={() => PromtTrigger.current!.click()}>
+									<DropdownMenu.Item onClick={() => PromtRenameTrigger.current!.click()}>
 										<Flex gap={"3"} align={"center"}>
 											<MdOutlineDriveFileRenameOutline/>
 											Rename
@@ -164,7 +164,7 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
-			<ContextMenu.Item onClick={() => PromtTrigger.current!.click()}>
+			<ContextMenu.Item onClick={() => PromtRenameTrigger.current!.click()}>
 				<Flex gap={"3"} align={"center"}>
 					<MdOutlineDriveFileRenameOutline/>
 					Rename
