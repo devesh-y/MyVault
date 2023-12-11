@@ -13,6 +13,7 @@ import {ref, uploadBytesResumable} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
 import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
+import { TailSpin } from 'react-loader-spinner'
 export type generalDir ={
 	name:string,
 	timestamp?:Date,
@@ -24,6 +25,7 @@ export type generalDir ={
 }
 
 export const Documents=()=>{
+	const [docsLoading,setDocsLoading]=useState(true);
 	const navigate=useNavigate();
 	const {dir_path}=useParams();
 	const [Files,setFiles]=useState(new Array<generalDir>());
@@ -46,18 +48,20 @@ export const Documents=()=>{
 					finalpath+="/folders";
 				}
 			})
-			getDocs(collection(database,finalpath+"/folders")).then((response)=>{
-				response.forEach((doc)=>{
+			const promise1=getDocs(collection(database,finalpath+"/folders"))
+			const promise2=getDocs(collection(database,finalpath+"/files"));
+			Promise.all([promise1,promise2]).then((values)=>{
+				values[0].forEach((doc)=>{
 					tempfolders.push({name:doc.data().name,id:doc.id})
 				})
-				setFolders(tempfolders);
-			})
-			getDocs(collection(database,finalpath+"/files")).then((response)=>{
-				response.forEach((doc)=>{
+				values[1].forEach((doc)=>{
 					tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
 				})
+				setFolders(tempfolders);
 				setFiles(tempfiles);
+				setDocsLoading(false);
 			})
+
 
 		}
 	},[UserInfo, dir_path]);
@@ -226,21 +230,37 @@ export const Documents=()=>{
 		{/*<div id={"fileUploadProgressdiv"} style={{position:"absolute"}}>*/}
 
 		{/*</div>*/}
-		{Folders.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Folders</p>:<></>}
-		<div id={"documents-folders"}>
-			{
-				Folders.map((value,index)=>{
-					return <FolderDocs key={index+(dir_path?dir_path:"")} folder_info={value} setFolders={setFolders} Folders={Folders}/>
-				})
-			}
-		</div>
-		{Files.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Files</p>:<></>}
-		<div id={"documents-files"}>
-			{
-				Files.map((value,index)=>{
-					return <FileDocs key={index+(dir_path?dir_path:"")} Files={Files} setFiles={setFiles}  file_info={value} />
-				})
-			}
-		</div>
+		{
+			docsLoading?<div style={{display:"flex",justifyContent:"center",margin:"10px"}}>
+				<TailSpin
+					height="80"
+					width="80"
+					color="#4fa94d"
+					ariaLabel="tail-spin-loading"
+					radius="1"
+					wrapperStyle={{}}
+					wrapperClass=""
+					visible={true}
+				/>
+			</div> :<>
+				{Folders.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Folders</p>:<></>}
+				<div id={"documents-folders"}>
+					{
+						Folders.map((value,index)=>{
+							return <FolderDocs key={index+(dir_path?dir_path:"")} folder_info={value} setFolders={setFolders} Folders={Folders}/>
+						})
+					}
+				</div>
+				{Files.length>0?<p style={{margin:"10px 0px",fontWeight:700}}>Files</p>:<></>}
+				<div id={"documents-files"}>
+					{
+						Files.map((value,index)=>{
+							return <FileDocs key={index+(dir_path?dir_path:"")} Files={Files} setFiles={setFiles}  file_info={value} />
+						})
+					}
+				</div>
+			</>
+		}
+
 	</div>
 }
