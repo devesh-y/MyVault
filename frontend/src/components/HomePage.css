@@ -43,3 +43,11 @@
     gap: 10px;
 
 }
+.dropDownDots{
+    display:flex;
+    border-radius:50%;
+    padding:10px;
+}
+.dropDownDots:active{
+    background-color: #b7b3b3;
+}

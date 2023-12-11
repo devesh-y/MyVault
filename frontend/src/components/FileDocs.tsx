@@ -367,20 +367,21 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 			<ContextMenu.Trigger >
 				<div title={file_info.name}  onDoubleClick={()=>openFile(file_info,false)} style={
 					{
-						width:"fit-content",
+						width:250,
 						borderRadius: "10px",
-						padding:"10px",
 						backgroundColor:"#e1f3eb",
 						display:"flex",
+						padding:"5px 10px",
 						justifyContent:"space-between",
 						alignItems:"center",
+
 					}
 				}>
-					<p style={{width:200,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</p>
+					<p style={{textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{file_info.name}</p>
 					<div>
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>
-								<div>
+								<div className={"dropDownDots"}>
 									<BsThreeDotsVertical size={14}/>
 								</div>
 

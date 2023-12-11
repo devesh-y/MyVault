@@ -11,6 +11,8 @@ import {generalDir} from "./Documents.tsx";
 import {RiDeleteBin6Line} from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 // import {IoMdInformationCircleOutline} from "react-icons/io";
+import { FcFolder } from "react-icons/fc";
+
 
 export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>})=>{
 	const {dir_path}=useParams();
@@ -107,57 +109,65 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 
 				<div title={folder_info.name}  onDoubleClick={()=>openFolder(folder_info)} style={
 					{
-						width:"fit-content",
+						width:"150px",
 						borderRadius: "10px",
-						padding:"10px",
 						backgroundColor:"#e1f3eb",
 						display:"flex",
-						justifyContent:"space-between",
-						alignItems:"center",
+						padding:"5px 10px",
+						flexDirection:"column"
 					}
 				}>
-					<p style={{width:200,textOverflow:"ellipsis",overflow:"hidden",whiteSpace:"nowrap"}}>{folder_info.name}</p>
 					<div>
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger>
-								<div>
-									<BsThreeDotsVertical size={14}/>
-								</div>
-
-							</DropdownMenu.Trigger>
-							<DropdownMenu.Content>
-								<DropdownMenu.Item onClick={()=>PromtTrigger.current!.click()} >
-									<Flex gap={"3"} align={"center"}>
-									<MdOutlineDriveFileRenameOutline />
-									Rename
-									</Flex>
-								</DropdownMenu.Item>
-								{/*<DropdownMenu.Item >*/}
-								{/*	<Flex gap={"3"} align={"center"}>*/}
-								{/*	<IoMdInformationCircleOutline/>*/}
-								{/*	Folder Info*/}
-								{/*	</Flex>*/}
-								{/*</DropdownMenu.Item>*/}
-								<DropdownMenu.Separator />
-								<DropdownMenu.Item  color="red" onClick={deleteFolderFunc}>
-									<Flex gap={"3"} align={"center"}>
-									<RiDeleteBin6Line/>
-									Delete
-									</Flex>
-								</DropdownMenu.Item>
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
+						<FcFolder size={80} />
 					</div>
-				</div>
+					<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+						<p style={{
+							textOverflow: "ellipsis",
+							overflow: "hidden",
+							whiteSpace: "nowrap"
+						}}>{folder_info.name}</p>
+						<div>
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
+									<div className={"dropDownDots"}>
+										<BsThreeDotsVertical size={14}/>
+									</div>
 
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content>
+									<DropdownMenu.Item onClick={() => PromtTrigger.current!.click()}>
+										<Flex gap={"3"} align={"center"}>
+											<MdOutlineDriveFileRenameOutline/>
+											Rename
+										</Flex>
+									</DropdownMenu.Item>
+									{/*<DropdownMenu.Item >*/}
+									{/*	<Flex gap={"3"} align={"center"}>*/}
+									{/*	<IoMdInformationCircleOutline/>*/}
+									{/*	Folder Info*/}
+									{/*	</Flex>*/}
+									{/*</DropdownMenu.Item>*/}
+									<DropdownMenu.Separator/>
+									<DropdownMenu.Item color="red" onClick={deleteFolderFunc}>
+										<Flex gap={"3"} align={"center"}>
+											<RiDeleteBin6Line/>
+											Delete
+										</Flex>
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+						</div>
+					</div>
+
+				</div>
 
 
 		</ContextMenu.Trigger>
 		<ContextMenu.Content>
-			<ContextMenu.Item onClick={()=>PromtTrigger.current!.click()} >
+			<ContextMenu.Item onClick={() => PromtTrigger.current!.click()}>
 				<Flex gap={"3"} align={"center"}>
-				<MdOutlineDriveFileRenameOutline/>
-				Rename
+					<MdOutlineDriveFileRenameOutline/>
+					Rename
 				</Flex>
 			</ContextMenu.Item>
 			{/*<ContextMenu.Item>*/}
@@ -166,11 +176,11 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 			{/*	Folder Info*/}
 			{/*	</Flex>*/}
 			{/*</ContextMenu.Item>*/}
-			<ContextMenu.Separator />
-			<ContextMenu.Item  color="red" onClick={deleteFolderFunc}>
+			<ContextMenu.Separator/>
+			<ContextMenu.Item color="red" onClick={deleteFolderFunc}>
 				<Flex gap={"3"} align={"center"}>
-				<RiDeleteBin6Line/>
-				Delete
+					<RiDeleteBin6Line/>
+					Delete
 				</Flex>
 			</ContextMenu.Item>
 		</ContextMenu.Content>
