@@ -1,6 +1,6 @@
 import ReactDOM from 'react-dom/client'
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import {LoginPage} from "./components/LoginPage.tsx";
+import {AuthPage} from "./components/AuthPage.tsx";
 import {HomePage} from "./components/HomePage.tsx";
 import {Provider} from "react-redux";
 import {store} from "./ReduxStore/store.ts";
@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 			<BrowserRouter>
 				<Routes>
 					<Route path={"/"} element={<Navigate to={"/login"} replace={true}/>}/>
-					<Route path={"/login"} element={<LoginPage/>}/>
+					<Route path={"/login"} element={<AuthPage/>}/>
 					<Route path={"/wrong_page"} element={<WrongPage/>}/>
 					<Route path={"/:dir_path"} element={<HomePage/>}/>
 					<Route path={"/access/:access_id"} element={<Access_files/>}/>

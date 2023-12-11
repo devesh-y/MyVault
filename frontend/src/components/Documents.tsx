@@ -1,5 +1,5 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {collection, getDocs, setDoc, doc} from "firebase/firestore";
+import {collection, getDocs, setDoc, doc, getDoc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
 import {memo, useEffect, useMemo, useRef} from "react";
 import {User} from "firebase/auth"
@@ -48,23 +48,33 @@ export const Documents=memo(()=>{
                     finalpath+="/folders";
                 }
             })
-            const promise1=getDocs(collection(database,finalpath+"/folders"))
-            const promise2=getDocs(collection(database,finalpath+"/files"));
-            Promise.all([promise1,promise2]).then((values)=>{
-                values[0].forEach((doc)=>{
-                    tempfolders.push({name:doc.data().name,id:doc.id})
-                })
-                values[1].forEach((doc)=>{
-                    tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
-                })
-                setFolders(tempfolders);
-                setFiles(tempfiles);
-                setDocsLoading(false);
+            const lastindex=finalpath.lastIndexOf("/");
+            getDoc(doc(database,finalpath.substring(0,lastindex),pathArray[pathArray.length-1])).then((snap)=>{
+                if(!snap.exists())
+                {
+                    navigate("/wrong_page",{replace:true})
+                    return;
+                }
+                else{
+                    const promise1=getDocs(collection(database,finalpath+"/folders"))
+                    const promise2=getDocs(collection(database,finalpath+"/files"));
+                    Promise.all([promise1,promise2]).then((values)=>{
+                        values[0].forEach((doc)=>{
+                            tempfolders.push({name:doc.data().name,id:doc.id})
+                        })
+                        values[1].forEach((doc)=>{
+                            tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
+                        })
+                        setFolders(tempfolders);
+                        setFiles(tempfiles);
+                        setDocsLoading(false);
+                    })
+                }
             })
 
-
         }
-    },[UserInfo, dir_path]);
+    },[UserInfo, dir_path, navigate]);
+    
 
     //get cookie
     const response=useMemo(()=>{
@@ -77,18 +87,15 @@ export const Documents=memo(()=>{
             navigate('/login',{replace:true});
         }
         else{
-            if(UserInfo==""){
+            if(UserInfo===""){
                 dispatch(setUserInfo(response));
             }
-            else if(dir_path!.substring(0,4)=="root"){
-                RetrieveDocs();
-            }
             else{
-                navigate("/wrong_page",{replace:true});
+                RetrieveDocs()
             }
         }
 
-    },[RetrieveDocs, UserInfo, dir_path, dispatch, navigate, response])
+    },[RetrieveDocs, UserInfo, dispatch, navigate, response])
 
     const upload_files=useCallback(async()=>{
         if(myFileInput.current?.files){
