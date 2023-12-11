@@ -14,7 +14,7 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FcFolder } from "react-icons/fc";
 
 
-export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>})=>{
+export const FolderDocs=memo(({folder_info,Folders,setFolders,setDocsLoading}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>,setDocsLoading: React.Dispatch<React.SetStateAction<boolean>>})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [inputRename,setInputRename]=useState("");
@@ -57,8 +57,9 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:gene
 		finalpath+="/";
 		finalpath+=value.id;
 		finalpath=encodeURIComponent(finalpath);
+		setDocsLoading(true);
 		navigate("/"+finalpath);
-	},[dir_path, navigate])
+	},[dir_path, navigate, setDocsLoading])
 	const PromtRenameTrigger=useRef<HTMLButtonElement>(null)
 	const deleteFolderFunc=useCallback(()=>{
 		const arr=dir_path!.split("/")!;

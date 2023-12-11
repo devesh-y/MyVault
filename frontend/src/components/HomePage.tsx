@@ -1,6 +1,6 @@
 import "./HomePage.css"
-import {Documents} from "./Documents.tsx";
 import {Link, useParams} from "react-router-dom";
+import {Documents} from "./Documents.tsx";
 const CurrentPath=()=>{
 	const {dir_path}=useParams();
 	const arr=dir_path!.split('/');
