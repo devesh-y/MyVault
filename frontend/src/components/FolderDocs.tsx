@@ -14,7 +14,7 @@ import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 import { FcFolder } from "react-icons/fc";
 
 
-export const FolderDocs=memo(({folder_info,Folders,setFolders,setDocsLoading}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>,setDocsLoading: React.Dispatch<React.SetStateAction<boolean>>})=>{
+export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>})=>{
 	const {dir_path}=useParams();
 	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [inputRename,setInputRename]=useState("");
@@ -45,6 +45,12 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders,setDocsLoading}:{f
 						newvalues.name=inputRename;
 						temp.splice(index,0,newvalues);
 						setFolders(temp);
+						const cache=localStorage.getItem(email!+dir_path);
+						if(cache){
+							const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+							const folders=temp;
+							localStorage.setItem(email!+dir_path,JSON.stringify({files:obj["files"],folders}));
+						}
 						setInputRename("");
 					}
 				});
@@ -57,9 +63,8 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders,setDocsLoading}:{f
 		finalpath+="/";
 		finalpath+=value.id;
 		finalpath=encodeURIComponent(finalpath);
-		setDocsLoading(true);
 		navigate("/"+finalpath);
-	},[dir_path, navigate, setDocsLoading])
+	},[dir_path, navigate])
 	const PromtRenameTrigger=useRef<HTMLButtonElement>(null)
 	const deleteFolderFunc=useCallback(()=>{
 		const arr=dir_path!.split("/")!;
@@ -79,6 +84,12 @@ export const FolderDocs=memo(({folder_info,Folders,setFolders,setDocsLoading}:{f
 				const temp=Array.from(Folders);
 				temp.splice(index,1);
 				setFolders(temp);
+				const cache=localStorage.getItem(email!+dir_path);
+				if(cache){
+					const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+					const folders=temp;
+					localStorage.setItem(email!+dir_path,JSON.stringify({files:obj["files"],folders}));
+				}
 			}
 		}).catch(()=>{
 			console.log("error in deleting folder");

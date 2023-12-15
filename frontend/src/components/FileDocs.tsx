@@ -53,6 +53,12 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 						newvalues.name=inputRename;
 						temp.splice(index,0,newvalues);
 						setFiles(temp);
+						const cache=localStorage.getItem(email!+dir_path);
+						if(cache){
+							const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+							const files=temp;
+							localStorage.setItem(email!+dir_path,JSON.stringify({folders:obj["folders"],files}));
+						}
 						setInputRename("");
 					}
 				});
@@ -160,6 +166,12 @@ export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,set
 			const temp=Array.from(Files);
 			temp.splice(index,1);
 			setFiles(temp);
+			const cache=localStorage.getItem(email!+dir_path);
+			if(cache){
+				const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+				const files=temp;
+				localStorage.setItem(email!+dir_path,JSON.stringify({folders:obj["folders"],files}));
+			}
 		}
 
 

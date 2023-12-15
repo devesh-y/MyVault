@@ -1,7 +1,7 @@
 import { useNavigate, useParams} from "react-router-dom";
 import {collection, getDocs, setDoc, doc, getDoc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
-import {useEffect, useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef, useTransition} from "react";
 import {User} from "firebase/auth"
 import React,{useCallback, useState} from "react";
 import {GetCookie} from "../utils/get_set_cookies.ts";
@@ -26,7 +26,7 @@ export type generalDir ={
 }
 
 export const Documents=()=>{
-    const [DocsLoading,setDocsLoading]=useState(true);
+    const [DocsLoading,setDocsLoading]=useState(false);
     const navigate=useNavigate();
     const {dir_path}=useParams();
     const [Files,setFiles]=useState(new Array<generalDir>());
@@ -34,43 +34,59 @@ export const Documents=()=>{
     const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo)
     const dispatch=useDispatch();
     const myFileInput=useRef<HTMLInputElement>(null)
+    const [,retrieveFunc]=useTransition();
     //retrieve docs
     const RetrieveDocs=useCallback( ()=>{
-        if(UserInfo!=""){
-            const {email}:User=JSON.parse(UserInfo)
-            const tempfiles=new Array<generalDir>()
-            const tempfolders=new Array<generalDir>()
-            let finalpath=email!;
-            const pathArray=dir_path!.split('/');
-            pathArray.forEach((value,index,pathArray)=>{
-                finalpath+="/"+value;
-                if(index<pathArray.length-1)
-                {
-                    finalpath+="/folders";
-                }
-            })
-            const lastindex=finalpath.lastIndexOf("/");
-            getDoc(doc(database,finalpath.substring(0,lastindex),pathArray[pathArray.length-1])).then((snap)=>{
-                if(!snap.exists())
-                {
-                    navigate("/wrong_page",{replace:true})
-                    return;
-                }
-                else{
-                    const promise1=getDocs(collection(database,finalpath+"/folders"))
-                    const promise2=getDocs(collection(database,finalpath+"/files"));
-                    Promise.all([promise1,promise2]).then((values)=>{
-                        values[0].forEach((doc)=>{
-                            tempfolders.push({name:doc.data().name,id:doc.id})
+        if(UserInfo!="") {
+            const {email}: User = JSON.parse(UserInfo)
+            const cache = localStorage.getItem(email! + dir_path);
+            if (cache) {
+                const obj:{folders:generalDir[],files:generalDir[]} = JSON.parse(cache);
+                setFolders(obj["folders"]);
+                setFiles(obj["files"]);
+                setDocsLoading(false);
+            }
+            else{
+                setDocsLoading(true);
+            }
+            retrieveFunc(()=>{
+                const tempfiles=new Array<generalDir>()
+                const tempfolders=new Array<generalDir>()
+                let finalpath=email!;
+                const pathArray=dir_path!.split('/');
+                pathArray.forEach((value,index,pathArray)=>{
+                    finalpath+="/"+value;
+                    if(index<pathArray.length-1)
+                    {
+                        finalpath+="/folders";
+                    }
+                })
+                const lastindex=finalpath.lastIndexOf("/");
+                getDoc(doc(database,finalpath.substring(0,lastindex),pathArray[pathArray.length-1])).then((snap)=>{
+                    if(!snap.exists())
+                    {
+                        navigate("/wrong_page",{replace:true})
+                        return;
+                    }
+                    else{
+                        const promise1=getDocs(collection(database,finalpath+"/folders"))
+                        const promise2=getDocs(collection(database,finalpath+"/files"));
+                        Promise.all([promise1,promise2]).then((values)=>{
+                            values[0].forEach((doc)=>{
+                                tempfolders.push({name:doc.data().name,id:doc.id})
+                            })
+                            values[1].forEach((doc)=>{
+                                tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
+                            })
+                            setFolders(tempfolders);
+                            setFiles(tempfiles);
+                            localStorage.setItem(email!+dir_path,JSON.stringify({files:tempfiles,folders:tempfolders}));
+                            setDocsLoading(false);
                         })
-                        values[1].forEach((doc)=>{
-                            tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
-                        })
-                        setFolders(tempfolders);
-                        setFiles(tempfiles);
-                        setDocsLoading(false);
-                    })
-                }
+                    }
+                })
+
+
             })
 
         }
@@ -147,6 +163,12 @@ export const Documents=()=>{
                     await setDoc(doc(database,"access_files_db",uniqueId),{host_email:email,allowed_users:[],extension:fileExt,size:file.size,type:file.type,name:filename})
                     tempFiles.push({name:filename,id:CurrDateTime,access_id:uniqueId,extension:fileExt,size:file.size,type:file.type});
                     setFiles([...Files,...tempFiles]);
+                    const cache=localStorage.getItem(email!+dir_path);
+                    if(cache){
+                        const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+                        const files=[...Files,...tempFiles];
+                        localStorage.setItem(email!+dir_path,JSON.stringify({files,folders:obj["folders"]}));
+                    }
                 }
                 catch(err){
                     return new Promise((_resolve,reject)=>{
@@ -190,6 +212,12 @@ export const Documents=()=>{
             setDoc(doc(database,finalpath+"/folders",CurrDateTime),{name:newFolderName}).then(()=>{
                 console.log("folder created successfully");
                 setFolders([...Folders,{name:newFolderName,id:CurrDateTime}]);
+                const cache=localStorage.getItem(email!+dir_path);
+                if(cache){
+                    const obj:{files:generalDir[],folders:generalDir[]}=JSON.parse(cache);
+                    const folders=[...Folders,{name:newFolderName,id:CurrDateTime}]
+                    localStorage.setItem(email!+dir_path,JSON.stringify({folders,files:obj["files"]}));
+                }
                 setNewFolderName("");
             }).catch(()=>{
                 console.log("error in folder creation");
@@ -205,7 +233,7 @@ export const Documents=()=>{
         e.currentTarget.style.backgroundColor = "white"
     }} onDropCapture={(e) => DropEventFunc(e)}>
 
-        <CurrentPath dir_path={dir_path} setDocsLoading={setDocsLoading} navigate={navigate}/>
+        <CurrentPath dir_path={dir_path}/>
         <Flex gap="3">
 
             <Dialog.Root>
@@ -258,7 +286,7 @@ export const Documents=()=>{
                     {
                         Folders.map((value, index) => {
                             return <FolderDocs key={index + (dir_path ? dir_path : "")} folder_info={value}
-                                               setFolders={setFolders} Folders={Folders} setDocsLoading={setDocsLoading}/>
+                                               setFolders={setFolders} Folders={Folders}/>
                         })
                     }
                 </div>
