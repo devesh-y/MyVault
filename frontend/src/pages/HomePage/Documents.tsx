@@ -1,13 +1,13 @@
 import { useNavigate, useParams} from "react-router-dom";
 import {collection, getDocs, setDoc, doc, getDoc} from "firebase/firestore";
-import {database, fireStorage} from "../utils/firebaseconf.ts";
+import {database, fireStorage} from "../../utils/firebaseconf.ts";
 import {useEffect, useMemo, useRef, useTransition} from "react";
 import {User} from "firebase/auth"
 import React,{useCallback, useState} from "react";
-import {GetCookie} from "../utils/get_set_cookies.ts";
+import {GetCookie} from "../../utils/get_set_cookies.ts";
 import {useDispatch, useSelector} from "react-redux";
-import {setUserInfo} from "../ReduxStore/slice.ts";
-import {StoreType} from "../ReduxStore/store.ts";
+import {setUserInfo} from "../../ReduxStore/slice.ts";
+import {StoreType} from "../../ReduxStore/store.ts";
 import {SHA256} from "crypto-js";
 import {ref, uploadBytesResumable} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";

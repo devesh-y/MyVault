@@ -1,13 +1,13 @@
 import ReactDOM from 'react-dom/client'
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import {AuthPage} from "./components/AuthPage.tsx";
-import {HomePage} from "./components/HomePage.tsx";
+import {AuthPage} from "./pages/LoginPage/AuthPage.tsx";
+import {HomePage} from "./pages/HomePage/HomePage.tsx";
 import {Provider} from "react-redux";
 import {store} from "./ReduxStore/store.ts";
 import '@radix-ui/themes/styles.css';
 import { Theme } from '@radix-ui/themes';
-import {Access_files} from "./components/Access_files.tsx";
-import {WrongPage} from "./components/WrongPage.tsx";
+import {Access_files} from "./pages/AccessPage/Access_files.tsx";
+import {WrongPage} from "./pages/WrongUrl/WrongPage.tsx";
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<Theme>
 		<Provider store={store}>

@@ -1,12 +1,12 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {doc,getDoc} from "firebase/firestore";
-import {database} from "../utils/firebaseconf.ts";
+import {database} from "../../utils/firebaseconf.ts";
 import {useDispatch, useSelector} from "react-redux";
-import {StoreType} from "../ReduxStore/store.ts";
+import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth";
-import {setUserInfo} from "../ReduxStore/slice.ts";
-import {GetCookie} from "../utils/get_set_cookies.ts";
+import {setUserInfo} from "../../ReduxStore/slice.ts";
+import {GetCookie} from "../../utils/get_set_cookies.ts";
 import {Button, Dialog, Flex, Text} from "@radix-ui/themes";
 export const Access_files=()=>{
 	const {access_id}=useParams();

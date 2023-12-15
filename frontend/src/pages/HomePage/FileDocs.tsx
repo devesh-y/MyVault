@@ -2,10 +2,10 @@ import {Button, ContextMenu, Dialog, DropdownMenu, Flex, TextField, Text, IconBu
 import React, {useCallback, useRef, useState,memo} from "react";
 import {useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
-import {StoreType} from "../ReduxStore/store.ts";
+import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth"
 import {updateDoc, doc, deleteDoc, getDoc} from "firebase/firestore";
-import {database,fireStorage} from "../utils/firebaseconf.ts";
+import {database,fireStorage} from "../../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import { IoAdd } from "react-icons/io5";

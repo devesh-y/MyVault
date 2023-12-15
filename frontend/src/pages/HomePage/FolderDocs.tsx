@@ -2,10 +2,10 @@ import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-
 import React, {useCallback, useRef, useState,memo} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
-import {StoreType} from "../ReduxStore/store.ts";
+import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth"
 import {updateDoc, doc, deleteDoc, getDoc} from "firebase/firestore";
-import {database} from "../utils/firebaseconf.ts";
+import {database} from "../../utils/firebaseconf.ts";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {generalDir} from "./Documents.tsx";
 import {RiDeleteBin6Line} from "react-icons/ri";

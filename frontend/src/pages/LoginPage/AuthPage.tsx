@@ -2,13 +2,13 @@ import "./AuthPage.css"
 import {FcGoogle} from "react-icons/fc"
 import {useNavigate} from "react-router-dom";
 import {useCallback, useEffect, useState} from "react";
-import {SetCookie} from "../utils/get_set_cookies.ts";
-import {GetCookie} from "../utils/get_set_cookies.ts";
+import {SetCookie} from "../../utils/get_set_cookies.ts";
+import {GetCookie} from "../../utils/get_set_cookies.ts";
 import {useDispatch} from "react-redux";
-import {setUserInfo} from "../ReduxStore/slice.ts";
+import {setUserInfo} from "../../ReduxStore/slice.ts";
 
 import {TailSpin} from "react-loader-spinner";
-import {HandleLogin} from "../utils/HandleLogin.ts";
+import {HandleLogin} from "../../utils/HandleLogin.ts";
 
 
 export const AuthPage=()=>{
