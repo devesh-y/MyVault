@@ -4,15 +4,13 @@ import {useNavigate} from "react-router-dom";
 import {useCallback, useEffect, useState} from "react";
 import {SetCookie} from "../../utils/get_set_cookies.ts";
 import {GetCookie} from "../../utils/get_set_cookies.ts";
-import {useDispatch} from "react-redux";
-import {setUserInfo} from "../../ReduxStore/slice.ts";
 
 import {TailSpin} from "react-loader-spinner";
 import {HandleLogin} from "../../utils/HandleLogin.ts";
 
 
 export const AuthPage=()=>{
-	const dispatch=useDispatch();
+
 	const navigate =useNavigate();
 	const [showAuthPage,setAuthPage]=useState(false);
 	const LoginFunc=useCallback((create:boolean)=>{
@@ -20,7 +18,6 @@ export const AuthPage=()=>{
 		HandleLogin(create).then((res)=>{
 			const user=JSON.stringify(res);
 			SetCookie(user);
-			dispatch(setUserInfo(user));
 			navigate("/root", {replace: true });
 
 		}).catch((err)=>{
@@ -28,18 +25,17 @@ export const AuthPage=()=>{
 			setAuthPage(true);
 			console.log(err)
 		})
-	},[dispatch, navigate])
+	},[navigate])
 	useEffect(()=>{
 		const response=GetCookie();
 		if(response){
-			dispatch(setUserInfo(response));
 			navigate("/root", { replace: true });
 		}
 		else{
 			setAuthPage(true)
 		}
 
-	},[dispatch, navigate])
+	},[navigate])
 
 	return <div id={"loginpage"}>
 		{showAuthPage?

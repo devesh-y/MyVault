@@ -2,27 +2,22 @@ import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {doc,getDoc} from "firebase/firestore";
 import {database} from "../../utils/firebaseconf.ts";
-import {useDispatch, useSelector} from "react-redux";
-import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth";
-import {setUserInfo} from "../../ReduxStore/slice.ts";
 import {GetCookie} from "../../utils/get_set_cookies.ts";
 import {Button, Dialog, Flex, Text} from "@radix-ui/themes";
 export const Access_files=()=>{
 	const {access_id}=useParams();
 	const navigate=useNavigate();
-	const dispatch=useDispatch();
-	const response=useMemo(()=>{
+	const UserInfo=useMemo(()=>{
 		return GetCookie();
 	},[])
 	const [denied_access,setDeniedAccess]=useState(false);
 	const promtdownloadedfile=useRef<HTMLButtonElement>(null);
-	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
 	const [downloadInputUrl,setDownloadInputUrl]=useState<undefined|string>(undefined);
 	const [DownloadProgress,setDownloadProgress]=useState(0);
 	const [file_info,setFileInfo]=useState({name:"",type:""});
 	const RetrieverAccessFile=useCallback(()=>{
-		if(UserInfo!=""){
+		if(UserInfo && UserInfo!=""){
 			const {email}:User=JSON.parse(UserInfo)
 			getDoc( doc(database,"access_files_db",access_id!)).then((docSnap)=>{
 				if(docSnap.exists()){
@@ -85,15 +80,13 @@ export const Access_files=()=>{
 	},[UserInfo, access_id, navigate])
 
 	useEffect(()=>{
-		if(!response){
+		if(!UserInfo){
 			navigate('/login');
 		}
 		else{
-			dispatch(setUserInfo(response))
 			RetrieverAccessFile();
 		}
-
-	},[RetrieverAccessFile, dispatch, navigate, response])
+	},[RetrieverAccessFile, navigate, UserInfo])
 	
 	return <>
 		<Dialog.Root>

@@ -1,13 +1,9 @@
 import { useNavigate, useParams} from "react-router-dom";
 import {collection, getDocs, setDoc, doc, getDoc} from "firebase/firestore";
 import {database, fireStorage} from "../../utils/firebaseconf.ts";
-import {useEffect, useMemo, useRef, useTransition} from "react";
+import {useContext, useEffect, useRef, useTransition} from "react";
 import {User} from "firebase/auth"
 import React,{useCallback, useState} from "react";
-import {GetCookie} from "../../utils/get_set_cookies.ts";
-import {useDispatch, useSelector} from "react-redux";
-import {setUserInfo} from "../../ReduxStore/slice.ts";
-import {StoreType} from "../../ReduxStore/store.ts";
 import {SHA256} from "crypto-js";
 import {ref, uploadBytesResumable} from "firebase/storage";
 import {FileDocs} from "./FileDocs.tsx";
@@ -15,6 +11,7 @@ import {FolderDocs} from "./FolderDocs.tsx"
 import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
 import {TailSpin} from "react-loader-spinner";
 import {CurrentPath} from "./CurrentPath.tsx";
+import {UserContext} from "./HomePage.tsx";
 export type generalDir ={
     name:string,
     timestamp?:Date,
@@ -31,88 +28,68 @@ export const Documents=()=>{
     const {dir_path}=useParams();
     const [Files,setFiles]=useState(new Array<generalDir>());
     const [Folders,setFolders]=useState(new Array<generalDir>());
-    const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo)
-    const dispatch=useDispatch();
+    const UserInfo=useContext(UserContext)
     const myFileInput=useRef<HTMLInputElement>(null)
     const [,retrieveFunc]=useTransition();
     //retrieve docs
     const RetrieveDocs=useCallback( ()=>{
-        if(UserInfo!="") {
-            const {email}: User = JSON.parse(UserInfo)
-            const cache = localStorage.getItem(email! + dir_path);
-            if (cache) {
-                const obj:{folders:generalDir[],files:generalDir[]} = JSON.parse(cache);
-                setFolders(obj["folders"]);
-                setFiles(obj["files"]);
-                setDocsLoading(false);
-            }
-            else{
-                setDocsLoading(true);
-            }
-            retrieveFunc(()=>{
-                const tempfiles=new Array<generalDir>()
-                const tempfolders=new Array<generalDir>()
-                let finalpath=email!;
-                const pathArray=dir_path!.split('/');
-                pathArray.forEach((value,index,pathArray)=>{
-                    finalpath+="/"+value;
-                    if(index<pathArray.length-1)
-                    {
-                        finalpath+="/folders";
-                    }
-                })
-                const lastindex=finalpath.lastIndexOf("/");
-                getDoc(doc(database,finalpath.substring(0,lastindex),pathArray[pathArray.length-1])).then((snap)=>{
-                    if(!snap.exists())
-                    {
-                        navigate("/wrong_page",{replace:true})
-                        return;
-                    }
-                    else{
-                        const promise1=getDocs(collection(database,finalpath+"/folders"))
-                        const promise2=getDocs(collection(database,finalpath+"/files"));
-                        Promise.all([promise1,promise2]).then((values)=>{
-                            values[0].forEach((doc)=>{
-                                tempfolders.push({name:doc.data().name,id:doc.id})
-                            })
-                            values[1].forEach((doc)=>{
-                                tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
-                            })
-                            setFolders(tempfolders);
-                            setFiles(tempfiles);
-                            localStorage.setItem(email!+dir_path,JSON.stringify({files:tempfiles,folders:tempfolders}));
-                            setDocsLoading(false);
-                        })
-                    }
-                })
-
-
-            })
-
-        }
-    },[UserInfo, dir_path, navigate]);
-    
-
-    //get cookie
-    const response=useMemo(()=>{
-        return GetCookie();
-    },[])
-    //page routing if cookie not available
-    useEffect(()=>{
-
-        if(!response){
-            navigate('/login',{replace:true});
+        const {email}: User = JSON.parse(UserInfo)
+        const cache = localStorage.getItem(email! + dir_path);
+        if (cache) {
+            const obj:{folders:generalDir[],files:generalDir[]} = JSON.parse(cache);
+            setFolders(obj["folders"]);
+            setFiles(obj["files"]);
+            setDocsLoading(false);
         }
         else{
-            if(UserInfo===""){
-                dispatch(setUserInfo(response));
-            }
-            else{
-                RetrieveDocs()
-            }
+            setDocsLoading(true);
         }
+        retrieveFunc(()=>{
+            const tempfiles=new Array<generalDir>()
+            const tempfolders=new Array<generalDir>()
+            let finalpath=email!;
+            const pathArray=dir_path!.split('/');
+            pathArray.forEach((value,index,pathArray)=>{
+                finalpath+="/"+value;
+                if(index<pathArray.length-1)
+                {
+                    finalpath+="/folders";
+                }
+            })
+            const lastindex=finalpath.lastIndexOf("/");
+            getDoc(doc(database,finalpath.substring(0,lastindex),pathArray[pathArray.length-1])).then((snap)=>{
+                if(!snap.exists())
+                {
+                    navigate("/wrong_page",{replace:true})
+                    return;
+                }
+                else{
+                    const promise1=getDocs(collection(database,finalpath+"/folders"))
+                    const promise2=getDocs(collection(database,finalpath+"/files"));
+                    Promise.all([promise1,promise2]).then((values)=>{
+                        values[0].forEach((doc)=>{
+                            tempfolders.push({name:doc.data().name,id:doc.id})
+                        })
+                        values[1].forEach((doc)=>{
+                            tempfiles.push({name:doc.data().name,id:doc.id,access_id:doc.data().access_id,extension:doc.data().extension,size:doc.data().size,type:doc.data().type})
+                        })
+                        setFolders(tempfolders);
+                        setFiles(tempfiles);
+                        localStorage.setItem(email!+dir_path,JSON.stringify({files:tempfiles,folders:tempfolders}));
+                        setDocsLoading(false);
+                    })
+                }
+            })
 
-    },[RetrieveDocs, UserInfo, dispatch, navigate, response])
+
+        })
+
+
+    },[UserInfo, dir_path, navigate]);
+    
+    useEffect(()=>{
+        RetrieveDocs()
+    },[RetrieveDocs])
 
     const upload_files=useCallback(async()=>{
         if(myFileInput.current?.files){

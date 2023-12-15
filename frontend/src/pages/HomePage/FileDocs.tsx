@@ -1,8 +1,6 @@
 import {Button, ContextMenu, Dialog, DropdownMenu, Flex, TextField, Text, IconButton, ScrollArea} from "@radix-ui/themes";
-import React, {useCallback, useRef, useState,memo} from "react";
+import React, {useCallback, useRef, useState, memo, useContext} from "react";
 import {useParams} from "react-router-dom";
-import {useSelector} from "react-redux";
-import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth"
 import {updateDoc, doc, deleteDoc, getDoc} from "firebase/firestore";
 import {database,fireStorage} from "../../utils/firebaseconf.ts";
@@ -16,9 +14,10 @@ import { GoDownload } from "react-icons/go";
 import { MdOutlineShare } from "react-icons/md";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { IoCopyOutline } from "react-icons/io5";
+import {UserContext} from "./HomePage.tsx";
 export const FileDocs=memo(({file_info,Files,setFiles}:{file_info:generalDir,setFiles:React.Dispatch<React.SetStateAction<generalDir[]>>,Files:generalDir[]})=>{
 	const {dir_path}=useParams();
-	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
+	const UserInfo=useContext(UserContext);
 	const [inputRename,setInputRename]=useState("");
 	const RenamePromtTrigger=useRef<HTMLButtonElement>(null)
 	const SharePromtTrigger=useRef<HTMLButtonElement>(null);

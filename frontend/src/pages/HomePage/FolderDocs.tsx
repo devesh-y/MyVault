@@ -1,8 +1,6 @@
 import {Button, ContextMenu, Dialog, Flex, TextField,DropdownMenu} from "@radix-ui/themes";
-import React, {useCallback, useRef, useState,memo} from "react";
+import React, {useCallback, useRef, useState, memo, useContext} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {useSelector} from "react-redux";
-import {StoreType} from "../../ReduxStore/store.ts";
 import {User} from "firebase/auth"
 import {updateDoc, doc, deleteDoc, getDoc} from "firebase/firestore";
 import {database} from "../../utils/firebaseconf.ts";
@@ -12,11 +10,12 @@ import {RiDeleteBin6Line} from "react-icons/ri";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
 // import {IoMdInformationCircleOutline} from "react-icons/io";
 import { FcFolder } from "react-icons/fc";
+import {UserContext} from "./HomePage.tsx";
 
 
 export const FolderDocs=memo(({folder_info,Folders,setFolders}:{folder_info:generalDir,Folders:generalDir[],setFolders: React.Dispatch<React.SetStateAction<generalDir[]>>})=>{
 	const {dir_path}=useParams();
-	const UserInfo=useSelector((store:StoreType)=>store.slice1.UserInfo);
+	const UserInfo=useContext(UserContext);
 	const [inputRename,setInputRename]=useState("");
 	const navigate=useNavigate();
 	const rename_folder_func=useCallback( ()=>{
