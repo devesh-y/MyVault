@@ -1,7 +1,7 @@
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams} from "react-router-dom";
 import {collection, getDocs, setDoc, doc, getDoc} from "firebase/firestore";
 import {database, fireStorage} from "../utils/firebaseconf.ts";
-import {memo, useEffect, useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 import {User} from "firebase/auth"
 import React,{useCallback, useState} from "react";
 import {GetCookie} from "../utils/get_set_cookies.ts";
@@ -14,6 +14,7 @@ import {FileDocs} from "./FileDocs.tsx";
 import {FolderDocs} from "./FolderDocs.tsx"
 import {Flex,Button,Dialog,TextField} from "@radix-ui/themes"
 import {TailSpin} from "react-loader-spinner";
+import {CurrentPath} from "./CurrentPath.tsx";
 export type generalDir ={
     name:string,
     timestamp?:Date,
@@ -24,7 +25,7 @@ export type generalDir ={
     size?:number
 }
 
-export const Documents=memo(()=>{
+export const Documents=()=>{
     const [DocsLoading,setDocsLoading]=useState(true);
     const navigate=useNavigate();
     const {dir_path}=useParams();
@@ -204,6 +205,7 @@ export const Documents=memo(()=>{
         e.currentTarget.style.backgroundColor = "white"
     }} onDropCapture={(e) => DropEventFunc(e)}>
 
+        <CurrentPath dir_path={dir_path} setDocsLoading={setDocsLoading} navigate={navigate}/>
         <Flex gap="3">
 
             <Dialog.Root>
@@ -273,4 +275,4 @@ export const Documents=memo(()=>{
         }
 
     </div>
-})
+}
