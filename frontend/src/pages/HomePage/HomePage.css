@@ -48,6 +48,6 @@
     border-radius:50%;
     padding:10px;
 }
-.dropDownDots:active{
+.dropDownDots:hover{
     background-color: #b7b3b3;
 }
